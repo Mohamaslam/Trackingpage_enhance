@@ -1,0 +1,1157 @@
+<style>
+  /* Page background and shell to match sample image */
+  body { background: #e9f0f7; }
+  .page-shell { max-width: 1200px; margin: 28px auto; padding: 28px; box-sizing: border-box }
+  .content-card {
+    background: #f8fafc; /* very light gray outer card */
+    border-radius: 18px;
+    padding: 26px;
+    box-shadow: 0 18px 40px rgba(15,23,42,0.06);
+  }
+  .PageHeader {
+    display: none;
+  }
+
+  .w-100 {
+    width: 100% !important;
+  }
+
+  .cap {
+    text-transform: capitalize;
+    color: rgb(var(--color-foreground) / 1);
+  }
+
+  .nr {
+    color: rgb(var(--color-foreground) / 1);
+  }
+
+  #renderResponse p {
+    color: rgb(var(--color-foreground) / .6);
+  }
+
+  #renderResponse .Segment__Title {
+    margin-bottom: 14px;
+  }
+
+  #renderResponse .Segment {
+    margin-top: 25px;
+    border-bottom: 1px solid rgb(var(--color-border));
+    padding-bottom: 25px;
+  }
+
+  #renderResponse .Segment:last-child {
+    border-bottom: none;
+  }
+
+  #renderResponse .Segment+.Segment {
+    margin-top: 25px;
+  }
+
+  #renderResponse .mb-0 {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  #renderResponse .mb-4 {
+    margin-bottom: 20px;
+  }
+
+  .ta-center {
+    text-align: center;
+  }
+
+  #renderResponse .mt-4 {
+    margin-top: 20px;
+  }
+
+  #renderResponse .button--close {
+    height: var(--sp-12);
+    width: var(--sp-12);
+    flex: 0 0 auto;
+    margin-inline-start: auto;
+  }
+
+  p.orderConfirmation {
+    color: var(--text-color) !important;
+    line-height: 1.65;
+    margin-bottom: 20px;
+    border: 1px solid rgb(var(--color-foreground));
+    padding: 6px;
+  }
+
+  /* Status badge styles */
+  .status-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    color: #fff;
+    vertical-align: middle;
+  }
+
+  .status--processing { background: #f59e0b; } /* amber */
+  .status--pending    { background: #6b7280; } /* gray */
+  .status--shipped    { background: #3b82f6; } /* blue */
+  .status--delivered  { background: #10b981; } /* green */
+  .status--cancelled  { background: #ef4444; } /* red */
+  .status--in_transit  { background: #6366f1; } /* indigo */
+  .status--default    { background: #374151; }
+
+  /* Progress stepper styles */
+  .order-progress {
+    /* replace per-step layout with a single horizontal track */
+    display: block;
+    position: relative;
+    padding: 12px 6px; /* slightly reduced vertical padding for slim look */
+    background: transparent;
+    overflow: visible; /* ensure emoji isn't clipped */
+  }
+
+  .order-track {
+    position: relative;
+    height: 6px; /* slim track like sample */
+    background: rgba(229,231,235,0.9);
+    border-radius: 6px;
+    overflow: visible;
+    z-index: 0;
+  }
+
+  .order-track-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0%;
+    background: linear-gradient(90deg,#10b981,#16a34a); /* soft green gradient */
+    border-radius: 6px;
+    transition: width 2200ms cubic-bezier(.2,.8,.2,1);
+    z-index: 3; /* above markers so fill can visually cover markers when active */
+  }
+  .order-track-fill .flow{position:absolute;left:-40%;top:0;bottom:0;width:60%;background:linear-gradient(90deg,rgba(255,255,255,0.18),rgba(255,255,255,0.02),rgba(255,255,255,0.18));opacity:0.55;animation:flow 1.2s linear infinite}
+  @keyframes flow{from{transform:translateX(0)}to{transform:translateX(160%)}}
+
+  .order-markers {
+    display: flex;
+    justify-content: space-between;
+    /* pull markers down so they overlap the track and appear merged */
+    margin-top: -8px; /* slightly lifted, leaving more room for labels */
+  }
+
+  .order-marker {
+    font-size: 12px;
+    color: #374151;
+    text-align: center;
+    flex: 1 1 0;
+    padding: 0 6px;
+    white-space: nowrap;
+  }
+
+  /* visible dot above the track for each marker */
+  .order-marker {
+    position: relative;
+    padding-top: 12px; /* keep dot centered on the track */
+  }
+
+  .order-marker::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #e6e9ee;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    transition: background 450ms ease, transform 450ms ease, box-shadow 450ms ease, opacity 200ms ease;
+    z-index: 4; /* above the fill so marker visually sits on top */
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  /* checkmark (hidden until active) */
+  .order-marker::after {
+    content: '\2713';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    font-size: 14px;
+    color: white;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 6;
+    transition: opacity 300ms ease, transform 300ms ease;
+  }
+
+  .order-marker.active::before {
+    background: #10b981; /* green */
+    transform: translate(-50%, -50%) scale(1.05);
+    box-shadow: 0 6px 18px rgba(16,185,129,0.14);
+  }
+
+  .order-marker.active::after { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+  .order-marker .marker-label{
+    display:block;
+    margin-top:40px; /* push text further down below the pill */
+    font-size:15px; /* slightly larger for clarity */
+    color:#111827; /* darker for better contrast */
+    font-weight:600;
+    line-height:1.1;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width:72px; /* keep label compact under each marker */
+    display:inline-block;
+    text-align:center;
+    position:relative;
+    z-index:6; /* above fill so label stays readable */
+  }
+
+  /* active label emphasised */
+  .order-marker.active .marker-label {
+    color: #0b63e6; /* blue tint to indicate active */
+    font-weight:700;
+  }
+
+  /* current step label above track */
+  .current-step-label{
+    text-align:center;
+    font-size:13px;
+    color:#0f172a;
+    font-weight:700;
+    margin: 0 0 6px 0;
+  }
+
+  /* moving emoji that shows progress */
+  .track-emoji {
+    position: absolute;
+    top: -10px; /* sit slightly above the track */
+    left: 0%;
+    transform: translateX(-50%) scale(1);
+    /* use same duration for left and transform to keep movements in sync */
+    transition: left 2200ms cubic-bezier(.2,.8,.2,1), transform 2200ms cubic-bezier(.2,.8,.2,1);
+    font-size: 22px;
+    pointer-events: none;
+    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.12));
+    z-index: 9999;
+  }
+
+  /* truck always faces right */
+  .track-emoji.truck { 
+    transform-origin: center center;
+    /* always face right: align the truck's right edge to the track position
+       and force a neutral rotation so platform emoji variants appear consistent */
+    transform: translateX(-100%) scale(1) scaleX(1) rotate(0deg);
+    transition: left 2200ms cubic-bezier(.2,.8,.2,1), transform 2200ms cubic-bezier(.2,.8,.2,1);
+  }
+  /* when at delivered state, just scale up slightly */
+  .track-emoji.truck.rotate { 
+    transform: translateX(-100%) scale(1.15) scaleX(1) rotate(0deg); 
+  }
+
+  .step-label {
+    font-size: 12px;
+    color: #374151;
+  }
+
+  .step-completed .step-indicator {
+    background: #10b981; /* green */
+  }
+
+  .step-current .step-indicator {
+    background: #3b82f6; /* blue */
+  }
+
+  .step-completed .step-line,
+  .step-current .step-line {
+    background: transparent;
+  }
+
+  /* indicator animation */
+  .step-indicator {
+    transition: transform 900ms ease, background 900ms ease, box-shadow 900ms ease;
+  }
+
+  .step-completed .step-indicator {
+    transform: scale(1.05);
+  }
+
+  .step-current .step-indicator {
+    transform: scale(1.25);
+    box-shadow: 0 0 0 6px rgba(59,130,246,0.08);
+  }
+
+  /* Form card and controls styling */
+
+  .tracking-form-card {
+    background: #ffffff;
+    border: 1px solid #e6e9ee;
+    padding: 14px; /* tightened padding */
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(15,23,42,0.04);
+    margin-bottom: 8px;
+  }
+
+  .tracking-form-card h3 { margin: 0 0 6px 0; font-size: 17px; color: #0f172a }
+  .tracking-form-card p.lead { margin: 0 0 8px 0; color: #475569; font-size: 13px }
+
+  /* nicer primary button */
+  .btn-primary-custom {
+    background: linear-gradient(180deg,#0b63e6,#0657c8);
+    color: #fff;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(11,99,230,0.12);
+  }
+  .btn-primary-custom:disabled { opacity: 0.6; cursor: not-allowed }
+
+  /* form fields spacing inside card */
+  .tracking-form-card .field { margin-bottom: 8px }
+  .tracking-form-card label.label { display:block; margin-bottom:6px; font-size:13px; color:#334155 }
+  .tracking-form-card input.input { width:100%; padding:8px 10px; border:1px solid #e6e9ee; border-radius:6px }
+
+  /* Compact layout for narrow containers */
+  @media (max-width: 420px) {
+    .step-label { display: none; }
+  }
+
+  /* Result card layout */
+  .result-card {
+    background: #fff;
+    border: 1px solid #e6e9ee;
+    border-radius: 10px;
+    padding: 14px;
+    box-shadow: 0 8px 30px rgba(15,23,42,0.04);
+    display: grid;
+    grid-template-columns: 1fr; /* stack vertically so we can center the summary */
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* data table styles to match mock */
+  .table-card { background:#fff; border:1px solid #e6e9ee; border-radius:10px; box-shadow:0 8px 30px rgba(15,23,42,0.04); padding:14px }
+  .table-card h4 { margin:0 0 10px 0; font-size:16px; color:#0f172a }
+  .table-toolbar { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px }
+  .table-toolbar .left { display:flex; align-items:center; gap:8px; font-size:13px; color:#475569 }
+  .table-toolbar select, .table-toolbar input { border:1px solid #e6e9ee; border-radius:6px; padding:6px 8px; font-size:13px; background:#fff; color:#0f172a }
+  .orders-table { width:100%; border-collapse:separate; border-spacing:0; font-size:13px }
+  .orders-table thead th { text-align:left; color:#475569; background:#f9fafb; border-bottom:1px solid #e6e9ee; padding:10px 10px; font-weight:600 }
+  .orders-table tbody td { padding:12px 10px; border-bottom:1px solid #eef2f7; color:#0f172a }
+  .orders-table tfoot td { padding:10px; color:#6b7280; font-size:12px }
+  .badge-pill { display:inline-block; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:700; color:#fff }
+  .badge-gray { background:#9ca3af }
+  .badge-indigo { background:#818cf8 }
+  .badge-green { background:#34d399 }
+  .table-footer { display:flex; justify-content:space-between; align-items:center; margin-top:10px }
+  .pager { display:flex; gap:8px; align-items:center }
+  .pager button { border:1px solid #e6e9ee; background:#fff; border-radius:6px; padding:6px 10px; font-size:12px; color:#0f172a; cursor:pointer }
+  .pager .current { background:#eef2ff; color:#4338ca; border-color:#c7d2fe }
+
+  .result-summary { padding: 8px 12px; width: 100%; max-width: 720px; margin: 0 auto; text-align: left; }
+  .result-summary .summary-row { display:flex; padding:8px 0; border-bottom:1px dashed rgba(15,23,42,0.03); align-items:center }
+  .result-summary .summary-row:last-child { border-bottom: none; }
+  .result-summary .summary-key { color:#6b7280; font-size:13px; flex: 0 0 55%; }
+  .result-summary .summary-val { color:#0f172a; font-weight:700; text-align:right; flex: 0 0 45%; }
+
+  /* Center labels and increase font sizes for readability */
+  .result-card h3 { font-size: 20px; text-align: center; margin-bottom: 10px }
+  .result-summary { text-align: center; background:#f9fafb; border:1px solid #eef2f7; border-radius:10px; padding:12px 14px; }
+  .result-summary .summary-row { justify-content: center; }
+  .result-summary .summary-key { font-size: 14px; color: #475569; flex: 0 0 50%; text-align: center }
+  .result-summary .summary-val { font-size: 16px; color: #0f172a; font-weight: 800; flex: 0 0 50%; text-align: center }
+  .result-summary h4 { font-size: 16px; text-align: center; margin-bottom:6px }
+
+  .tracking-timeline { list-style:none; margin:0; padding:0; }
+  .tracking-timeline li { padding:8px 6px; border-left:3px solid transparent; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center }
+  .tracking-timeline li.completed { border-left-color: #10b981; color:#0f172a }
+  .tracking-timeline li.current { border-left-color: #3b82f6; font-weight:700 }
+  .timeline-label { font-size:13px; flex: 0 0 65%; }
+  .timeline-time { font-size:12px; color:#6b7280; flex: 0 0 35%; text-align:right }
+
+  /* Make the result card stack on small screens */
+  @media (max-width: 780px) {
+    .result-card { grid-template-columns: 1fr; }
+    .result-summary { order: 2 }
+  }
+</style>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
+<script>
+  $(document).ready(function () {
+
+    // ---------- Functions ----------
+    function statusBadge(status) {
+      if (!status) return '<span class="status-badge status--default" aria-label="status unknown">Unknown</span>';
+      var key = String(status).toLowerCase().replace(/\s+/g, '_');
+      var map = {
+        'processing': { cls: 'status--processing', label: 'Processing' },
+        'pending': { cls: 'status--pending', label: 'Pending' },
+        'shipped': { cls: 'status--shipped', label: 'Shipped' },
+        'delivered': { cls: 'status--delivered', label: 'Delivered' },
+        'cancelled': { cls: 'status--cancelled', label: 'Cancelled' },
+        'in_transit': { cls: 'status--in_transit', label: 'In transit' }
+      };
+      var entry = map[key] || { cls: 'status--default', label: status };
+      return '<span class="status-badge ' + entry.cls + '" role="status" aria-live="polite">' + entry.label + '</span>';
+    }
+
+    // Progress stepper renderer
+    // Use a 4-step sequence that matches the server's shipment_status values:
+    // 0: Ordered, 1: Shipped, 2: In transit, 3: Delivered
+    var defaultSteps = ['Ordered', 'Shipped', 'In transit', 'Delivered'];
+
+    // Map known tokens to the 4-step index. We use ordered checks so more specific tokens
+    // are matched first. 'Out for delivery' will be treated as 'In transit' (index 2)
+    // because the server uses only four statuses.
+    function mapShipmentStatusToStep(status) {
+      if (!status) return 0; // Ordered
+      var s = String(status).toLowerCase();
+      // exact/common tokens -> index
+      var mappings = [
+        { tokens: ['ordered','placed','processing','pending'], idx: 0 },
+        { tokens: ['shipped','dispatched'], idx: 1 },
+        { tokens: ['in transit','in_transit','transit','out for delivery','out_for_delivery','on the way','on its way'], idx: 2 },
+        { tokens: ['delivered','complete','fulfilled','completed','delivered_successfully'], idx: 3 }
+      ];
+      for (var i = 0; i < mappings.length; i++) {
+        var entry = mappings[i];
+        for (var j = 0; j < entry.tokens.length; j++) {
+          if (s.indexOf(entry.tokens[j]) !== -1) return entry.idx;
+        }
+      }
+      // fallback: if contains 'transit' map to in transit
+      if (s.indexOf('transit') !== -1) return 2;
+      return 0;
+    }
+
+    // Helper: recursively scan object/string fields for known tokens and return the first matching value
+    function scanForKnownTokensInObject(obj, tokens) {
+      if (!obj || !tokens) return null;
+      if (typeof obj === 'string') {
+        var lower = obj.toLowerCase();
+        for (var t = 0; t < tokens.length; t++) if (lower.indexOf(tokens[t]) !== -1) return obj;
+        return null;
+      }
+      if (Array.isArray(obj)) {
+        for (var a = 0; a < obj.length; a++) {
+          var res = scanForKnownTokensInObject(obj[a], tokens);
+          if (res) return res;
+        }
+        return null;
+      }
+      if (typeof obj === 'object') {
+        for (var k in obj) {
+          if (!Object.prototype.hasOwnProperty.call(obj, k)) continue;
+          var v = obj[k];
+          if (typeof v === 'string') {
+            var lower = v.toLowerCase();
+            for (var ti = 0; ti < tokens.length; ti++) if (lower.indexOf(tokens[ti]) !== -1) return v;
+          } else if (typeof v === 'object') {
+            var nested = scanForKnownTokensInObject(v, tokens);
+            if (nested) return nested;
+          }
+        }
+      }
+      return null;
+    }
+
+    // Derive shipment status from fulfillment fields when present, but if shipment_status
+    // is missing, scan the fulfillment object for any string field containing a known token.
+    // As a last resort, check order-level fulfillment_status but only if it contains known tokens.
+    function deriveProgressStatus(orderData) {
+      if (!orderData) return null;
+      var knownTokens = ['pending','processing','shipped','dispatched','in transit','in_transit','transit','out for delivery','out_for_delivery','on the way','delivered','complete','fulfilled'];
+      if (orderData.fulfillments && orderData.fulfillments.length > 0) {
+        var f = orderData.fulfillments[0];
+        if (f) {
+          if (f.shipment_status) return String(f.shipment_status);
+          if (f.status) return String(f.status);
+          if (f.tracking_status) return String(f.tracking_status);
+          if (f.fulfillment_status) return String(f.fulfillment_status);
+          // infer from tracking numbers / urls when explicit shipment_status is missing
+          if (f.tracking_numbers && f.tracking_numbers.length > 0) return 'in transit';
+          if (f.tracking_urls && f.tracking_urls.length > 0) return 'in transit';
+          // scan other fields of fulfillment for any known token
+          var scanned = scanForKnownTokensInObject(f, knownTokens);
+          if (scanned) return String(scanned);
+        }
+      }
+      // order-level fallback
+      if (orderData.orders) {
+        if (orderData.orders.fulfillment_status) {
+          var cand = String(orderData.orders.fulfillment_status);
+          var found = scanForKnownTokensInObject(cand, knownTokens);
+          if (found) return cand;
+        }
+        // also scan other order-level fields
+        var scannedOrder = scanForKnownTokensInObject(orderData.orders, knownTokens);
+        if (scannedOrder) return String(scannedOrder);
+      }
+      return null;
+    }
+
+    // Detect if we inferred the status from tracking numbers/urls so diagnostics can show the source
+    function inferenceSource(orderData) {
+      if (!orderData) return null;
+      if (orderData.fulfillments && orderData.fulfillments.length > 0) {
+        var f = orderData.fulfillments[0];
+        if (f) {
+          if (!f.shipment_status) {
+            if (f.tracking_numbers && f.tracking_numbers.length > 0) return 'tracking_numbers';
+            if (f.tracking_urls && f.tracking_urls.length > 0) return 'tracking_urls';
+          }
+        }
+      }
+      return null;
+    }
+
+    function renderOrderProgress(steps, activeIndex) {
+      steps = steps || defaultSteps;
+      activeIndex = Math.max(0, Math.min(steps.length - 1, activeIndex || 0));
+
+      var container = $('#orderProgress');
+      container.empty();
+      // update current step label
+      try { $('#currentStepLabel').text(stepLabelForIndex(activeIndex)); } catch(e) {}
+      // single continuous track
+      var track = $('<div class="order-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>');
+  var fillEl = $('<div class="order-track-fill"><span class="flow"></span></div>');
+      // No emoji: we intentionally do not render the moving truck/emoji anymore.
+      track.append(fillEl);
+
+      var markers = $('<div class="order-markers" aria-hidden="true"></div>');
+      for (var i = 0; i < steps.length; i++) {
+        // wrap the step text in a marker-label so it can be styled/separated from the pill
+        markers.append('<div class="order-marker"><span class="marker-label">' + steps[i] + '</span></div>');
+      }
+
+      container.append(track);
+      container.append(markers);
+      $('#orderProgressContainer').show();
+
+      // initialize and animate to activeIndex
+      clearProgressAnimation();
+      // compute percent using marker center positions so the fill targets the marker itself
+      var percent = Math.round((activeIndex) / (Math.max(1, steps.length - 1)) * 100);
+      try {
+        var trackWidth = track.width();
+        if (trackWidth > 0) {
+          var tempMarkers = container.find('.order-marker');
+          if (tempMarkers && tempMarkers.length > 0) {
+            var m = tempMarkers.eq(activeIndex);
+            var markerCenter = m.offset().left + (m.outerWidth() / 2);
+            var trackLeft = track.offset().left;
+            var computedPct = Math.round(((markerCenter - trackLeft) / trackWidth) * 100);
+            if (!isNaN(computedPct) && computedPct >= 0 && computedPct <= 100) percent = computedPct;
+          }
+        }
+      } catch (e) {
+        // fallback to index-based percent
+      }
+      // set in a timeout to ensure CSS transition runs
+      setTimeout(function () {
+        fillEl.css('width', percent + '%');
+        // If target is the first step, mark it active immediately so 'Ordered' shows
+        if (activeIndex === 0) {
+          $('#orderProgress .order-marker').eq(0).addClass('active');
+        }
+        // monitor fill and activate markers exactly when the fill passes each marker
+        monitorFillAndActivateMarkers(fillEl, track, activeIndex, 2200);
+      }, 10);
+    }
+
+    // helper to get label for a step index
+    function stepLabelForIndex(idx) {
+      return defaultSteps[Math.max(0, Math.min(defaultSteps.length - 1, idx))];
+    }
+
+    var _progressTimeouts = [];
+  var _progressInterval = null;
+  var _fillMonitorRAF = null;
+
+    function clearProgressAnimation() {
+      _progressTimeouts.forEach(function (t) { clearTimeout(t); });
+      _progressTimeouts = [];
+      // reset single-track elements
+      $('#orderProgress .order-track-fill').css('width', '0%');
+      $('#orderProgress .track-emoji').css('left', '0%').css('transform', 'translateX(-50%) scale(1)');
+      // remove legacy classes if present
+      $('#orderProgress .order-step').removeClass('step-completed step-current');
+    }
+
+    // Schedule markers to activate sequentially so the checkmarks appear in-time with the fill animation
+    function scheduleMarkerActivations(targetIndex, durationMs) {
+      var markers = $('#orderProgress .order-marker');
+      // clear any pending activations
+      markers.removeClass('active');
+      // defensive
+      if (!markers || markers.length === 0) return;
+      durationMs = durationMs || 2200;
+      var effectiveTarget = Math.max(0, Math.min(markers.length - 1, targetIndex));
+      if (effectiveTarget === 0) {
+        // show first marker immediately
+        markers.eq(0).addClass('active');
+        return;
+      }
+      for (let i = 0; i <= effectiveTarget; i++) {
+        // stagger based on index relative to target
+        // earlier markers appear earlier; final marker aligned near end of duration
+        var delay = Math.round((i / Math.max(1, effectiveTarget)) * durationMs);
+        var t = setTimeout(function () {
+          markers.eq(i).addClass('active');
+        }, delay);
+        _progressTimeouts.push(t);
+      }
+    }
+
+    function parseCssTimeToMs(cssTime) {
+      if (!cssTime) return null;
+      // cssTime can be "2.2s" or "2200ms" or a comma-list; take first
+      var first = String(cssTime).split(',')[0].trim();
+      if (first.endsWith('ms')) return parseFloat(first.replace('ms',''));
+      if (first.endsWith('s')) return parseFloat(first.replace('s','')) * 1000;
+      var asNum = Number(first);
+      if (!isNaN(asNum)) return asNum;
+      return null;
+    }
+
+    // Monitor the fill element during its CSS transition and activate markers the moment
+    // the fill crosses each marker's position. This keeps checkmarks strictly in-sync
+    // with the visual fill regardless of timing differences.
+    function monitorFillAndActivateMarkers(fillEl, trackEl, targetIndex, fallbackDurationMs) {
+      // cancel any pending timeouts/raf
+      _progressTimeouts.forEach(function (t) { clearTimeout(t); });
+      _progressTimeouts = [];
+      if (_fillMonitorRAF) { cancelAnimationFrame(_fillMonitorRAF); _fillMonitorRAF = null; }
+
+  var markers = $('#orderProgress .order-marker');
+  if (!fillEl || !trackEl || markers.length === 0) return;
+
+      // compute marker positions as percentages of track width
+      var trackWidth = trackEl.width();
+      var markerPercents = [];
+      markers.each(function(i, el){
+        var $el = $(el);
+        // find center X relative to track using page offsets
+        var markerCenter = $el.offset().left + ($el.outerWidth() / 2);
+        var trackLeft = trackEl.offset().left;
+        var markerOffset = markerCenter - trackLeft;
+        var pct = (markerOffset / trackWidth) * 100;
+        markerPercents.push(pct);
+      });
+
+      // target percent (fill will animate from current to this percent)
+      var stepsCount = Math.max(1, markers.length - 1);
+      var targetPercent = Math.round((targetIndex) / stepsCount * 100);
+
+      // determine duration from computed style if possible
+      var cssDur = null;
+      try { cssDur = parseCssTimeToMs(window.getComputedStyle(fillEl[0]).transitionDuration); } catch (e) { cssDur = null; }
+      var durationMs = cssDur || fallbackDurationMs || 2200;
+
+  var activated = new Array(markers.length).fill(false);
+  // preserve any already-active markers (e.g., timestamp-driven or pre-activated)
+  markers.each(function(i, el){ if ($(el).hasClass('active')) activated[i] = true; });
+
+      function step() {
+        // current fill percent by reading fillEl width
+        var currentFillPx = fillEl.width();
+        var currentPct = (currentFillPx / trackWidth) * 100;
+        // activate any marker whose percent <= currentPct and index <= targetIndex
+        for (var i = 0; i <= targetIndex && i < markerPercents.length; i++) {
+          if (!activated[i] && markerPercents[i] <= currentPct + 0.5) { // small tolerance
+            $('#orderProgress .order-marker').eq(i).addClass('active');
+            activated[i] = true;
+          }
+        }
+        // continue until we've reached targetPercent (or all up to target activated)
+        var allDone = true;
+        for (var j = 0; j <= targetIndex; j++) if (!activated[j]) { allDone = false; break; }
+        if (!allDone) {
+          _fillMonitorRAF = requestAnimationFrame(step);
+        } else {
+          _fillMonitorRAF = null;
+        }
+      }
+
+      // start monitoring
+      _fillMonitorRAF = requestAnimationFrame(step);
+    }
+
+    // Parse various timestamp formats into milliseconds since epoch. Returns null if cannot parse.
+    function parseTimestampToMs(ts) {
+      if (!ts) return null;
+      // if already a number (seconds or milliseconds)
+      if (typeof ts === 'number') {
+        // Heuristic: if in seconds (10 digits), convert to ms
+        if (ts < 1e12) return ts * 1000; // assume seconds
+        return ts; // already ms
+      }
+      // if string, try Date.parse
+      var asNum = Number(ts);
+      if (!isNaN(asNum)) {
+        if (asNum < 1e12) return asNum * 1000; else return asNum;
+      }
+      var parsed = Date.parse(String(ts));
+      if (!isNaN(parsed)) return parsed;
+      return null;
+    }
+
+    // Schedule activations based on absolute timestamps (ms since epoch).
+    // stepTimestamps: array where index maps to marker index and value is ms since epoch (or null).
+    // Returns true when any future-scheduled activation was created.
+    function scheduleMarkerActivationsForTimestamps(stepTimestamps) {
+      if (!stepTimestamps || !Array.isArray(stepTimestamps)) return false;
+      var markers = $('#orderProgress .order-marker');
+      if (!markers || markers.length === 0) return false;
+      var anyScheduled = false;
+      for (var i = 0; i < Math.min(stepTimestamps.length, markers.length); i++) {
+        var ts = stepTimestamps[i];
+        if (!ts) continue;
+        var when = parseTimestampToMs(ts);
+        if (!when) continue;
+        var delay = when - Date.now();
+        if (delay <= 0) {
+          // in the past: mark active immediately
+          markers.eq(i).addClass('active');
+        } else {
+          anyScheduled = true;
+          var t = setTimeout((function (idx) { return function () { $('#orderProgress .order-marker').eq(idx).addClass('active'); }; })(i), delay);
+          _progressTimeouts.push(t);
+        }
+      }
+      return anyScheduled;
+    }
+
+    // Try to extract per-step timestamps from known response shapes.
+    // Returns an array of timestamps (ms or raw) aligned with `steps` order, or null if none found.
+    function extractStepTimestampsFromOrder(orderData, steps) {
+      if (!orderData || !steps) return null;
+      // Prefer an explicit progress_steps array if provided by API: [{label, timestamp, percentage}]
+      if (orderData.progress_steps && Array.isArray(orderData.progress_steps) && orderData.progress_steps.length > 0) {
+        var out = new Array(steps.length);
+        orderData.progress_steps.forEach(function (ps) {
+          var lbl = (ps.label || ps.status || ps.name || '').toString().toLowerCase();
+          for (var si = 0; si < steps.length; si++) {
+            if (lbl.indexOf(steps[si].toLowerCase()) !== -1 || steps[si].toLowerCase().indexOf(lbl) !== -1) {
+              out[si] = ps.timestamp || ps.time || ps.ts || ps.at || ps.when;
+              break;
+            }
+          }
+        });
+        return out;
+      }
+
+      // Fallback: check fulfillments[0].events or fulfillments[0].history arrays
+      if (orderData.fulfillments && orderData.fulfillments.length > 0) {
+        var f = orderData.fulfillments[0];
+        var events = f.events || f.history || f.tracking_events || null;
+        if (Array.isArray(events) && events.length > 0) {
+          var out2 = new Array(steps.length);
+          events.forEach(function (ev) {
+            var label = (ev.status || ev.name || ev.event || ev.description || '').toString();
+            var mapped = mapShipmentStatusToStep(label);
+            // only map when mapped is a valid index
+            if (typeof mapped === 'number' && mapped >= 0 && mapped < steps.length) {
+              out2[mapped] = ev.timestamp || ev.time || ev.at || ev.date || ev.when;
+            }
+          });
+          return out2;
+        }
+      }
+
+      return null;
+    }
+
+    function animateOrderProgress(targetIndex) {
+      // single-track animation: move fill and single emoji to the target percent
+      var track = $('#orderProgress .order-track');
+      var fill = track.find('.order-track-fill');
+      var emoji = track.find('.track-emoji');
+      var markers = $('#orderProgress .order-marker');
+      var stepsCount = Math.max(1, markers.length - 1);
+      var percent = Math.round((targetIndex) / stepsCount * 100);
+      // set ARIA for assistive tech
+      track.attr('aria-valuenow', percent);
+      // animate fill
+      fill.css('width', percent + '%');
+      // activate markers in sync with actual fill movement
+      monitorFillAndActivateMarkers(fill, track, targetIndex, 2200);
+      // slightly normalize scale after transition (maintain rotation state)
+      setTimeout(function () {
+        if (emoji.hasClass('truck')) {
+          // keep facing right, normalize scale (right-edge alignment preserved)
+          emoji.css('transform', 'translateX(-100%) scale(1.15) scaleX(1) rotate(0deg)');
+        } else {
+          emoji.css('transform', 'translateX(-50%) scale(1.15)');
+        }
+      }, 3800); // match CSS transition time
+    }
+
+    // Build progress DOM without animating (used before server response)
+    function buildProgressDom(steps) {
+      // Build simplified single-track skeleton used for indeterminate animation
+      steps = steps || defaultSteps;
+      var container = $('#orderProgress');
+      container.empty();
+    try { $('#currentStepLabel').text('Fetching status…'); } catch(e) {}
+    var track = $('<div class="order-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>');
+  var fill = $('<div class="order-track-fill"><span class="flow"></span></div>');
+    track.append(fill);
+      var markers = $('<div class="order-markers" aria-hidden="true"></div>');
+  for (var i = 0; i < steps.length; i++) markers.append('<div class="order-marker"><span class="marker-label">' + steps[i] + '</span></div>');
+      container.append(track);
+      container.append(markers);
+      $('#orderProgressContainer').show();
+    }
+
+    function startIndeterminateProgress() {
+      // Make sure DOM exists
+      if ($('#orderProgress .order-track').length === 0) buildProgressDom();
+      clearProgressAnimation();
+      var track = $('#orderProgress .order-track');
+      var fill = track.find('.order-track-fill');
+      var emoji = track.find('.track-emoji');
+      var markers = $('#orderProgress .order-marker');
+      var idx = 0;
+      // sweep the emoji across markers
+      // interval longer than transition so each sweep completes before next step
+      _progressInterval = setInterval(function () {
+        var stepsCount = Math.max(1, markers.length - 1);
+        var percent = Math.round((idx) / stepsCount * 100);
+        // trigger in timeout so transition animates
+        setTimeout(function () {
+          fill.css('width', percent + '%');
+          emoji.css('left', percent + '%');
+          // handle truck direction during sweep (always face right)
+          if (emoji.hasClass('truck')) {
+            if (idx >= (markers.length - 1)) {
+              emoji.addClass('rotate');
+              emoji.css('transform', 'translateX(-100%) scale(1.25) scaleX(1) rotate(0deg)');
+            } else {
+              emoji.removeClass('rotate');
+              emoji.css('transform', 'translateX(-100%) scale(1.25) scaleX(1) rotate(0deg)');
+            }
+          } else {
+            emoji.css('transform', 'translateX(-50%) scale(1.25)');
+          }
+          // mark current marker active
+          $('#orderProgress .order-marker').each(function(i, el){
+            if (i <= idx) $(el).addClass('active'); else $(el).removeClass('active');
+          });
+        }, 20);
+        setTimeout(function () {
+          if (emoji.hasClass('truck')) {
+            // normalize back to neutral scale while preserving right-edge alignment
+            emoji.css('transform', 'translateX(-100%) scale(1) scaleX(1) rotate(0deg)');
+          } else {
+            emoji.css('transform', 'translateX(-50%) scale(1)');
+          }
+        }, 3800); // match CSS transition time
+        idx = (idx + 1) % markers.length;
+      }, 4200); // interval slightly larger than transition for smooth pacing
+    }
+
+    function stopIndeterminateProgress() {
+      if (_progressInterval) { clearInterval(_progressInterval); _progressInterval = null; }
+      clearProgressAnimation();
+    }
+
+    function displayOrderDetails(orderData) {
+      $("#errorDiv").hide();
+      $("#orderDetails").show();
+
+      // Determine shipment status to drive progress bar using a robust derivation helper
+      var progressStatus = deriveProgressStatus(orderData);
+      console.debug('deriveProgressStatus ->', progressStatus);
+      var activeStep = mapShipmentStatusToStep(progressStatus);
+      console.debug('mapped activeStep ->', activeStep);
+      renderOrderProgress(null, activeStep);
+      // Attempt to use absolute per-step timestamps from the API when available so
+      // checkmarks appear exactly when those timestamps occur. Fall back to
+      // proportional/staggered activation when timestamps are not present.
+      try {
+        var stepTimestamps = extractStepTimestampsFromOrder(orderData, defaultSteps);
+        if (stepTimestamps && Array.isArray(stepTimestamps) && stepTimestamps.some(function (v) { return !!v; })) {
+          var scheduledAny = scheduleMarkerActivationsForTimestamps(stepTimestamps);
+          if (!scheduledAny) {
+            // nothing in the future: ensure markers up to activeStep are visible and synced with fill
+            var _track = $('#orderProgress .order-track');
+            var _fill = _track.find('.order-track-fill');
+            monitorFillAndActivateMarkers(_fill, _track, activeStep, 2200);
+          }
+        } else {
+          var _track = $('#orderProgress .order-track');
+          var _fill = _track.find('.order-track-fill');
+          monitorFillAndActivateMarkers(_fill, _track, activeStep, 2200);
+        }
+      } catch (e) {
+        console.warn('Error scheduling timestamp activations, falling back to proportional schedule', e);
+        var _track = $('#orderProgress .order-track');
+        var _fill = _track.find('.order-track-fill');
+        monitorFillAndActivateMarkers(_fill, _track, activeStep, 2200);
+      }
+
+    // diagnostics removed from UI per request (no raw/derived data displayed)
+
+  // Populate the compact summary panel
+  $("#summaryOrderNumber").text(orderData.orders.order_number || '—');
+  // also show the order code in the track header
+  $("#trackOrderCode").text(orderData.orders.order_number || '—');
+      $("#summaryStatus").html(statusBadge(orderData.orders.fulfillment_status || deriveProgressStatus(orderData) || 'Unknown'));
+      $("#summaryCustomer").text(orderData.orders.email || orderData.orders.phone || '—');
+      $("#summaryAddress").html(orderData.orders.shipping_address || '—');
+
+      // Build compact items list showing only product name and SKU for quick scanning
+      var itemsList = $("#summaryItems");
+      itemsList.empty();
+      if (orderData.orders.line_items && orderData.orders.line_items.length > 0) {
+        orderData.orders.line_items.forEach(function (it) {
+          var name = it.name || 'Item';
+          var sku = it.sku || '';
+          var li = $('<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px"></div>');
+          li.append('<div style="flex:0 0 70%;overflow:hidden;text-overflow:ellipsis">' + name + '</div>');
+          li.append('<div style="flex:0 0 28%;text-align:right;color:#6b7280">' + (sku || '&nbsp;') + '</div>');
+          itemsList.append(li);
+        });
+      } else {
+        itemsList.append('<div style="color:#6b7280">No items</div>');
+      }
+
+      // timeline removed; we instead show a centered summary and items list
+      // Populate top card status lines to match the mock
+      var human = stepLabelForIndex(activeStep);
+      var message = 'Your order has been ' + (human === 'Delivered' ? 'delivered' : human.toLowerCase());
+      $('#statusLine').text(message);
+      // Carrier/tracking line when available
+      var carrierText = '';
+      if (orderData.fulfillments && orderData.fulfillments.length > 0) {
+        var f0 = orderData.fulfillments[0] || {};
+        var carrier = f0.tracking_company || f0.carrier || f0.service || '';
+        var tn = (f0.tracking_numbers && f0.tracking_numbers[0]) || '';
+        if (carrier || tn) carrierText = (carrier ? carrier : 'Tracking number') + (tn ? ' (tracking number ' + tn + ')' : '');
+      }
+      $('#carrierLine').text(carrierText);
+
+      // Build the table rows for All Orders section (single order view)
+      var $tbody = $('#ordersTableBody');
+      $tbody.empty();
+      var lineItems = (orderData.orders && orderData.orders.line_items) ? orderData.orders.line_items : [];
+      var total = 0;
+      for (var i = 0; i < lineItems.length; i++) {
+        var li = lineItems[i];
+        var qty = Number(li.quantity || 1);
+        var price = Number(li.price || li.line_price || 0);
+        var rowTotal = isNaN(qty * price) ? 0 : qty * price;
+        total += rowTotal;
+        var $tr = $('<tr></tr>');
+        $tr.append('<td>' + String(i+1).padStart(2,'0') + '</td>');
+        $tr.append('<td>' + (orderData.orders.order_number || '—') + '</td>');
+        $tr.append('<td>' + (li.name || 'Item') + '</td>');
+        $tr.append('<td>' + qty + '</td>');
+        $tr.append('<td>' + rowTotal + '</td>');
+        // Delivery status badge
+        var delLbl = stepLabelForIndex(activeStep);
+        var delBadge = '<span class="badge-pill badge-gray">' + (delLbl === 'Delivered' ? 'Delivered' : (delLbl || 'Pending')) + '</span>';
+        $tr.append('<td>' + delBadge + '</td>');
+        // Order status badge
+        var ordStatus = (orderData.orders && (orderData.orders.financial_status || orderData.orders.fulfillment_status)) || 'Done';
+        var ordBadge = '<span class="badge-pill badge-indigo">' + (ordStatus ? String(ordStatus).charAt(0).toUpperCase() + String(ordStatus).slice(1) : 'Done') + '</span>';
+        $tr.append('<td>' + ordBadge + '</td>');
+        // Payout badge
+        $tr.append('<td><span class="badge-pill badge-green">Active</span></td>');
+        $tbody.append($tr);
+      }
+      if (lineItems.length === 0) {
+        var $trEmpty = $('<tr><td colspan="8" style="color:#6b7280">No items</td></tr>');
+        $tbody.append($trEmpty);
+      }
+      $('#ordersTableSummary').text('Total\t' + total);
+      $('#tableEntriesNote').text('Showing 1 to ' + (lineItems.length || 1) + ' of ' + (lineItems.length || 1) + ' entries');
+
+      // Removed auto-scroll to avoid unexpected page jumps after rendering
+    }
+
+    function displayError(errorMessage) {
+      $("#orderDetails").hide();
+      $("#errorDiv").show();
+      $("#errorMessage").text(errorMessage);
+    }
+
+    // ---------- Event Handlers ----------
+    $("#closeCurrent").click(function (e) {
+      // stop any running animation
+      stopIndeterminateProgress();
+      clearProgressAnimation();
+      $("#renderResponse").hide();
+      $("#orderForm").show();
+      $("#orderNumber, #email").val('');
+      e.preventDefault();
+    });
+
+    $("#orderForm").submit(function (event) {
+      event.preventDefault();
+
+      $("#submitButton").prop("disabled", true).text("Fetching...");
+
+      var orderNumber = $("#orderNumber").val();
+      var email = $("#email").val();
+
+      // show indeterminate progress immediately
+      startIndeterminateProgress();
+
+      $.ajax({
+        url: "https://analytics.triproriginals.com/tracking",
+        method: "GET",
+        data: {
+          order_id: orderNumber,
+          email: email
+        },
+        dataType: "json",
+        success: function (response) {
+          // stop indeterminate animation and show final progress
+          stopIndeterminateProgress();
+          if (response.error) {
+            displayError(response.error);
+          } else {
+            displayOrderDetails(response);
+          }
+          $('#renderResponse').show();
+          $('#orderForm').hide();
+          $("#submitButton").prop("disabled", false).text("Fetch details");
+        },
+        error: function (error) {
+          stopIndeterminateProgress();
+          console.error("Error fetching order details:", error);
+          var errorMessage = error.responseJSON ? error.responseJSON.error : "Error fetching order details.";
+          displayError(errorMessage);
+          $('#renderResponse').show();
+          $('#orderForm').hide(); 
+          $("#submitButton").prop("disabled", false).text("Fetch details");
+        }
+      });
+    });
+
+    // Simulation removed: production form will call the real API via submit
+
+  });
+</script>
+
+<div class="page-shell">
+  <div class="content-card">
+    <!-- Order progress bar (hidden until results) -->
+    <div id="orderProgressContainer" style="display:none; margin-bottom:12px;">
+      <div id="currentStepLabel" class="current-step-label" aria-live="polite"></div>
+      <div id="orderProgress" class="order-progress" aria-hidden="false"></div>
+    </div>
+  <form id="orderForm" class="grid gap-12">
+    <div class="tracking-form-card">
+      <h3>Track your order</h3>
+      <p class="lead">Enter the order number and your email or phone to see the latest tracking status.</p>
+      <div class="grid gap-5">
+        <div class="field">
+          <label class="label">Order number</label>
+          <input id="orderNumber" type="text" class="input is-floating" name="orderNumber" placeholder="e.g. TRIP-12345" aria-label="Order number" required autofocus>
+        </div>
+        <div class="field">
+          <label class="label">Email or phone</label>
+          <input id="email" type="text" class="input is-floating" name="email" placeholder="you@example.com or 9876543210" aria-label="Email / Phone" required>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button type="submit" id="submitButton" class="btn-primary-custom">Fetch details</button>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <div id="renderResponse" class="ProductItem__Wrapper w-100" style="display: none;">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+      <button id="closeCurrent" class="button button--secondary button--close items-center justify-center" type="button" is="hover-button" aria-label="Close">
+        <span class="btn-text"><svg class="icon icon-close icon-sm" viewBox="0 0 20 20" stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 15L15 5M5 5L15 15"></path>
+        </svg></span>
+      </button>
+    </div>
+
+    <div id="orderDetails" style="display: none;">
+      <!-- Top card: Track your Order -->
+      <div class="result-card" style="padding:18px; margin-bottom:12px;">
+        <div class="track-header" style="width:100%">
+          <h3 style="margin:0 0 6px 0;font-size:18px;color:#111827">Track your Order</h3>
+          <div class="order-code" style="font-size:13px;color:#374151">Order Code: <span id="trackOrderCode">—</span></div>
+        </div>
+        <div style="text-align:center;width:100%; margin-top:8px">
+          <!-- Progress bar is rendered above page-wide and reused here -->
+        </div>
+        <div style="width:100%; margin-top:6px; color:#0f172a; font-size:13px">
+          <div id="statusLine" style="margin-bottom:2px">&nbsp;</div>
+          <div id="carrierLine" style="color:#6b7280">&nbsp;</div>
+        </div>
+      </div>
+
+      <!-- Second card: All Orders table -->
+      <div class="table-card">
+        <h4>All Orders</h4>
+        <div class="table-toolbar">
+          <div class="left">
+            <span>Show</span>
+            <select id="showEntries">
+              <option value="10" selected>10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </select>
+            <span>entries</span>
+          </div>
+          <div class="right">
+            <input id="tableSearch" type="text" placeholder="Search" aria-label="Search table">
+          </div>
+        </div>
+        <div style="overflow:auto">
+          <table class="orders-table" id="ordersTable">
+            <thead>
+              <tr>
+                <th style="width:60px">#</th>
+                <th>Order Code</th>
+                <th>Product Name</th>
+                <th style="width:60px">Qty</th>
+                <th style="width:100px">Price</th>
+                <th style="width:140px">Delivery Status</th>
+                <th style="width:120px">Order Status</th>
+                <th style="width:100px">Payout</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody"></tbody>
+            <tfoot>
+              <tr>
+                <td colspan="8" id="ordersTableSummary">&nbsp;</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <div class="table-footer">
+          <div id="tableEntriesNote">&nbsp;</div>
+          <div class="pager">
+            <button type="button" id="prevPage">Previous</button>
+            <button type="button" class="current">1</button>
+            <button type="button" id="nextPage">Next</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="errorDiv" style="display: none;margin-top:8px">
+      <h4 style="margin:0 0 8px 0">Error</h4>
+      <p class="ta-center" id="errorMessage"></p>
+    </div>
+  </div>
+  </div>
+</div>
