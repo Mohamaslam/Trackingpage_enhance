@@ -1,12 +1,7 @@
 <style>
   /* Page background and shell to match sample image */
   body { background: #e9f0f7; }
-  .page-shell {
-    max-width: 1200px;
-    margin: 28px auto;
-    padding: 28px;
-    box-sizing: border-box;
-  }
+  .page-shell { max-width: 1200px; margin: 28px auto; padding: 28px; box-sizing: border-box }
   .content-card {
     background: #f8fafc; /* very light gray outer card */
     border-radius: 18px;
@@ -129,7 +124,7 @@
     top: 0;
     bottom: 0;
     width: 0%;
-    background: #10b981; /* solid green fill */
+    background: linear-gradient(90deg,#10b981,#16a34a); /* soft green gradient */
     border-radius: 6px;
     transition: width 2200ms cubic-bezier(.2,.8,.2,1);
     z-index: 3; /* above markers so fill can visually cover markers when active */
@@ -141,7 +136,7 @@
     display: flex;
     justify-content: space-between;
     /* pull markers down so they overlap the track and appear merged */
-    margin-top: -18px; /* lift markers above track */
+    margin-top: -8px; /* slightly lifted, leaving more room for labels */
   }
 
   .order-marker {
@@ -156,7 +151,7 @@
   /* visible dot above the track for each marker */
   .order-marker {
     position: relative;
-    padding-top: 12px; /* reduced space for slimmer track */
+    padding-top: 12px; /* keep dot centered on the track */
   }
 
   .order-marker::before {
@@ -200,8 +195,8 @@
 
   .order-marker .marker-label{
     display:block;
-    margin-top:4px; /* sit tightly under the pill so it appears attached */
-    font-size:13px; /* slightly larger for clarity */
+    margin-top:40px; /* push text further down below the pill */
+    font-size:15px; /* slightly larger for clarity */
     color:#111827; /* darker for better contrast */
     font-weight:600;
     line-height:1.1;
@@ -219,6 +214,15 @@
   .order-marker.active .marker-label {
     color: #0b63e6; /* blue tint to indicate active */
     font-weight:700;
+  }
+
+  /* current step label above track */
+  .current-step-label{
+    text-align:center;
+    font-size:13px;
+    color:#0f172a;
+    font-weight:700;
+    margin: 0 0 6px 0;
   }
 
   /* moving emoji that shows progress */
@@ -332,6 +336,25 @@
     box-sizing: border-box;
   }
 
+  /* data table styles to match mock */
+  .table-card { background:#fff; border:1px solid #e6e9ee; border-radius:10px; box-shadow:0 8px 30px rgba(15,23,42,0.04); padding:14px }
+  .table-card h4 { margin:0 0 10px 0; font-size:16px; color:#0f172a }
+  .table-toolbar { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px }
+  .table-toolbar .left { display:flex; align-items:center; gap:8px; font-size:13px; color:#475569 }
+  .table-toolbar select, .table-toolbar input { border:1px solid #e6e9ee; border-radius:6px; padding:6px 8px; font-size:13px; background:#fff; color:#0f172a }
+  .orders-table { width:100%; border-collapse:separate; border-spacing:0; font-size:13px }
+  .orders-table thead th { text-align:left; color:#475569; background:#f9fafb; border-bottom:1px solid #e6e9ee; padding:10px 10px; font-weight:600 }
+  .orders-table tbody td { padding:12px 10px; border-bottom:1px solid #eef2f7; color:#0f172a }
+  .orders-table tfoot td { padding:10px; color:#6b7280; font-size:12px }
+  .badge-pill { display:inline-block; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:700; color:#fff }
+  .badge-gray { background:#9ca3af }
+  .badge-indigo { background:#818cf8 }
+  .badge-green { background:#34d399 }
+  .table-footer { display:flex; justify-content:space-between; align-items:center; margin-top:10px }
+  .pager { display:flex; gap:8px; align-items:center }
+  .pager button { border:1px solid #e6e9ee; background:#fff; border-radius:6px; padding:6px 10px; font-size:12px; color:#0f172a; cursor:pointer }
+  .pager .current { background:#eef2ff; color:#4338ca; border-color:#c7d2fe }
+
   .result-summary { padding: 8px 12px; width: 100%; max-width: 720px; margin: 0 auto; text-align: left; }
   .result-summary .summary-row { display:flex; padding:8px 0; border-bottom:1px dashed rgba(15,23,42,0.03); align-items:center }
   .result-summary .summary-row:last-child { border-bottom: none; }
@@ -340,11 +363,11 @@
 
   /* Center labels and increase font sizes for readability */
   .result-card h3 { font-size: 20px; text-align: center; margin-bottom: 10px }
-  .result-summary { text-align: center; }
+  .result-summary { text-align: center; background:#f9fafb; border:1px solid #eef2f7; border-radius:10px; padding:12px 14px; }
   .result-summary .summary-row { justify-content: center; }
   .result-summary .summary-key { font-size: 14px; color: #475569; flex: 0 0 50%; text-align: center }
   .result-summary .summary-val { font-size: 16px; color: #0f172a; font-weight: 800; flex: 0 0 50%; text-align: center }
-  .result-summary h4 { font-size: 16px; text-align: center }
+  .result-summary h4 { font-size: 16px; text-align: center; margin-bottom:6px }
 
   .tracking-timeline { list-style:none; margin:0; padding:0; }
   .tracking-timeline li { padding:8px 6px; border-left:3px solid transparent; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center }
@@ -497,6 +520,8 @@
 
       var container = $('#orderProgress');
       container.empty();
+      // update current step label
+      try { $('#currentStepLabel').text(stepLabelForIndex(activeIndex)); } catch(e) {}
       // single continuous track
       var track = $('<div class="order-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>');
   var fillEl = $('<div class="order-track-fill"><span class="flow"></span></div>');
@@ -778,6 +803,7 @@
       steps = steps || defaultSteps;
       var container = $('#orderProgress');
       container.empty();
+    try { $('#currentStepLabel').text('Fetching status…'); } catch(e) {}
     var track = $('<div class="order-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>');
   var fill = $('<div class="order-track-fill"><span class="flow"></span></div>');
     track.append(fill);
@@ -902,11 +928,60 @@
       }
 
       // timeline removed; we instead show a centered summary and items list
+      // Populate top card status lines to match the mock
+      var human = stepLabelForIndex(activeStep);
+      var message = 'Your order has been ' + (human === 'Delivered' ? 'delivered' : human.toLowerCase());
+      $('#statusLine').text(message);
+      // Carrier/tracking line when available
+      var carrierText = '';
+      if (orderData.fulfillments && orderData.fulfillments.length > 0) {
+        var f0 = orderData.fulfillments[0] || {};
+        var carrier = f0.tracking_company || f0.carrier || f0.service || '';
+        var tn = (f0.tracking_numbers && f0.tracking_numbers[0]) || '';
+        if (carrier || tn) carrierText = (carrier ? carrier : 'Tracking number') + (tn ? ' (tracking number ' + tn + ')' : '');
+      }
+      $('#carrierLine').text(carrierText);
 
-      // After rendering, ensure the items area is visible by scrolling it into view.
+      // Build the table rows for All Orders section (single order view)
+      var $tbody = $('#ordersTableBody');
+      $tbody.empty();
+      var lineItems = (orderData.orders && orderData.orders.line_items) ? orderData.orders.line_items : [];
+      var total = 0;
+      for (var i = 0; i < lineItems.length; i++) {
+        var li = lineItems[i];
+        var qty = Number(li.quantity || 1);
+        var price = Number(li.price || li.line_price || 0);
+        var rowTotal = isNaN(qty * price) ? 0 : qty * price;
+        total += rowTotal;
+        var $tr = $('<tr></tr>');
+        $tr.append('<td>' + String(i+1).padStart(2,'0') + '</td>');
+        $tr.append('<td>' + (orderData.orders.order_number || '—') + '</td>');
+        $tr.append('<td>' + (li.name || 'Item') + '</td>');
+        $tr.append('<td>' + qty + '</td>');
+        $tr.append('<td>' + rowTotal + '</td>');
+        // Delivery status badge
+        var delLbl = stepLabelForIndex(activeStep);
+        var delBadge = '<span class="badge-pill badge-gray">' + (delLbl === 'Delivered' ? 'Delivered' : (delLbl || 'Pending')) + '</span>';
+        $tr.append('<td>' + delBadge + '</td>');
+        // Order status badge
+        var ordStatus = (orderData.orders && (orderData.orders.financial_status || orderData.orders.fulfillment_status)) || 'Done';
+        var ordBadge = '<span class="badge-pill badge-indigo">' + (ordStatus ? String(ordStatus).charAt(0).toUpperCase() + String(ordStatus).slice(1) : 'Done') + '</span>';
+        $tr.append('<td>' + ordBadge + '</td>');
+        // Payout badge
+        $tr.append('<td><span class="badge-pill badge-green">Active</span></td>');
+        $tbody.append($tr);
+      }
+      if (lineItems.length === 0) {
+        var $trEmpty = $('<tr><td colspan="8" style="color:#6b7280">No items</td></tr>');
+        $tbody.append($trEmpty);
+      }
+      $('#ordersTableSummary').text('Total\t' + total);
+      $('#tableEntriesNote').text('Showing 1 to ' + (lineItems.length || 1) + ' of ' + (lineItems.length || 1) + ' entries');
+
+      // After rendering, ensure the top card is centered in view.
       // Use a slight timeout so layout/animations complete before scrolling.
       setTimeout(function () {
-        var el = document.getElementById('summaryItems');
+        var el = document.getElementById('orderDetails');
         if (el && el.scrollIntoView) {
           try { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { el.scrollIntoView(); }
         }
@@ -982,6 +1057,7 @@
   <div class="content-card">
     <!-- Order progress bar (hidden until results) -->
     <div id="orderProgressContainer" style="display:none; margin-bottom:12px;">
+      <div id="currentStepLabel" class="current-step-label" aria-live="polite"></div>
       <div id="orderProgress" class="order-progress" aria-hidden="false"></div>
     </div>
   <form id="orderForm" class="grid gap-12">
@@ -1014,35 +1090,68 @@
     </div>
 
     <div id="orderDetails" style="display: none;">
-      <div class="track-header" style="margin-bottom:12px">
-        <h3 style="margin:0 0 6px 0;font-size:18px;color:#111827">Track your Order</h3>
-        <div class="order-code" style="font-size:13px;color:#374151">Order Code: <span id="trackOrderCode">—</span></div>
+      <!-- Top card: Track your Order -->
+      <div class="result-card" style="padding:18px; margin-bottom:12px;">
+        <div class="track-header" style="width:100%">
+          <h3 style="margin:0 0 6px 0;font-size:18px;color:#111827">Track your Order</h3>
+          <div class="order-code" style="font-size:13px;color:#374151">Order Code: <span id="trackOrderCode">—</span></div>
+        </div>
+        <div style="text-align:center;width:100%; margin-top:8px">
+          <!-- Progress bar is rendered above page-wide and reused here -->
+        </div>
+        <div style="width:100%; margin-top:6px; color:#0f172a; font-size:13px">
+          <div id="statusLine" style="margin-bottom:2px">&nbsp;</div>
+          <div id="carrierLine" style="color:#6b7280">&nbsp;</div>
+        </div>
       </div>
-      <div class="result-card" style="padding:18px;">
-    
-        <div style="text-align:center;width:100%">
-          <h3 style="margin:0 0 8px 0">Tracking</h3>
-          <div id="orderProgressContainer" style="margin-bottom:8px;">
-            <div id="orderProgress" class="order-progress" aria-hidden="false"></div>
+
+      <!-- Second card: All Orders table -->
+      <div class="table-card">
+        <h4>All Orders</h4>
+        <div class="table-toolbar">
+          <div class="left">
+            <span>Show</span>
+            <select id="showEntries">
+              <option value="10" selected>10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </select>
+            <span>entries</span>
+          </div>
+          <div class="right">
+            <input id="tableSearch" type="text" placeholder="Search" aria-label="Search table">
           </div>
         </div>
-
-        <div style="width:100%;display:flex;justify-content:center">
-        <aside class="result-summary">
-          <h4 style="margin:0 0 8px 0;font-size:14px">Summary</h4>
-          <div class="summary-row"><div class="summary-key">Order</div><div id="summaryOrderNumber" class="summary-val">—</div></div>
-          <div class="summary-row"><div class="summary-key">Status</div><div id="summaryStatus" class="summary-val">—</div></div>
-          <div class="summary-row"><div class="summary-key">Email id</div><div id="summaryCustomer" class="summary-val">—</div></div>
-          <div style="padding-top:8px;">
-            <div style="font-size:13px;color:#6b7280;margin-bottom:6px">Shipping address</div>
-            <div id="summaryAddress" style="font-size:13px;color:#0f172a;line-height:1.3;">—</div>
+        <div style="overflow:auto">
+          <table class="orders-table" id="ordersTable">
+            <thead>
+              <tr>
+                <th style="width:60px">#</th>
+                <th>Order Code</th>
+                <th>Product Name</th>
+                <th style="width:60px">Qty</th>
+                <th style="width:100px">Price</th>
+                <th style="width:140px">Delivery Status</th>
+                <th style="width:120px">Order Status</th>
+                <th style="width:100px">Payout</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody"></tbody>
+            <tfoot>
+              <tr>
+                <td colspan="8" id="ordersTableSummary">&nbsp;</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <div class="table-footer">
+          <div id="tableEntriesNote">&nbsp;</div>
+          <div class="pager">
+            <button type="button" id="prevPage">Previous</button>
+            <button type="button" class="current">1</button>
+            <button type="button" id="nextPage">Next</button>
           </div>
-
-          <div style="padding-top:12px">
-            <div style="font-size:13px;color:#6b7280;margin-bottom:6px">Items</div>
-            <div id="summaryItems"></div>
-          </div>
-        </aside>
+        </div>
       </div>
     </div>
 
