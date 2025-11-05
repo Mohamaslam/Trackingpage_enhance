@@ -978,14 +978,7 @@
       $('#ordersTableSummary').text('Total\t' + total);
       $('#tableEntriesNote').text('Showing 1 to ' + (lineItems.length || 1) + ' of ' + (lineItems.length || 1) + ' entries');
 
-      // After rendering, ensure the top card is centered in view.
-      // Use a slight timeout so layout/animations complete before scrolling.
-      setTimeout(function () {
-        var el = document.getElementById('orderDetails');
-        if (el && el.scrollIntoView) {
-          try { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { el.scrollIntoView(); }
-        }
-      }, 600);
+      // Removed auto-scroll to avoid unexpected page jumps after rendering
     }
 
     function displayError(errorMessage) {
