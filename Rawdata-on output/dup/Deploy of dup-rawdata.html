@@ -1,7 +1,7 @@
 <style>
   /* Page background and shell to match sample image */
   body { background: #e9f0f7; }
-  .page-shell { max-width: 1100px; margin: 28px auto; padding: 28px; box-sizing: border-box }
+  .page-shell { max-width: 1200px; margin: 28px auto; padding: 28px; box-sizing: border-box }
   .content-card {
     background: #f8fafc; /* very light gray outer card */
     border-radius: 18px;
@@ -352,6 +352,11 @@
   .table-toolbar { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px }
   .table-toolbar .left { display:flex; align-items:center; gap:8px; font-size:14px; color:#475569 }
   .table-toolbar select, .table-toolbar input { border:1px solid #e6e9ee; border-radius:6px; padding:6px 8px; font-size:13px; background:#fff; color:#0f172a }
+  .table-grid { display:grid; grid-template-columns: 2fr 1fr; gap:12px; align-items:start }
+  .table-wrap { min-width:0 }
+  .address-panel { background:#f9fafb; border:1px solid #e6e9ee; border-radius:10px; padding:12px }
+  .address-panel h5 { margin:0 0 8px 0; font-size:15px; color:#0f172a }
+  .address-line { font-size:13px; color:#334155; line-height:1.5 }
   .orders-table { width:100%; border-collapse:separate; border-spacing:0; font-size:14px }
   .orders-table thead th { text-align:left; color:#475569; background:#f9fafb; border-bottom:1px solid #e6e9ee; padding:10px 10px; font-weight:600 }
   .orders-table tbody td { padding:12px 10px; border-bottom:1px solid #eef2f7; color:#0f172a }
@@ -378,9 +383,19 @@
   .carrier-link { display:inline-flex; align-items:center; gap:8px; background:#0b63e6; color:#fff !important; text-decoration:none; padding:10px 14px; border-radius:10px; font-size:16px; font-weight:900; box-shadow:0 6px 18px rgba(11,99,230,0.18) }
   .carrier-link:hover { background:#0657c8 }
   .carrier-link .emoji { font-size:16px; line-height:1 }
-  /* larger order id text */
-  .track-header .order-code { font-size:18px !important; font-weight:800; color:#111827 !important }
-  .track-header .order-code #trackOrderCode { font-weight:900 }
+  /* order id line in top card */
+  .order-id-line { font-size:16px; font-weight:800; color:#111827; margin:0 0 4px 0 }
+  .order-id-line #trackOrderCode { font-weight:900 }
+  /* inline address next to carrier link */
+  .link-and-address { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-top:8px; flex-wrap:wrap }
+  .right-stack { display:flex; flex-direction:row; gap:12px; align-items:stretch; min-width:260px; flex-wrap:wrap }
+  .inline-contact { background:#f9fafb; border:1px solid #e6e9ee; border-radius:10px; padding:12px }
+  .inline-contact h5 { margin:0 0 6px 0; font-size:14px; color:#0f172a }
+  .inline-contact .address-line { font-size:13px; color:#334155; line-height:1.45 }
+  .inline-address { background:#f9fafb; border:1px solid #e6e9ee; border-radius:10px; padding:12px; min-width:260px }
+  .carrier-block { margin-top:8px }
+  .inline-address h5 { margin:0 0 6px 0; font-size:14px; color:#0f172a }
+  .inline-address .address-line { font-size:13px; color:#334155; line-height:1.45 }
 
   .result-summary { padding: 8px 12px; width: 100%; max-width: 720px; margin: 0 auto; text-align: left; }
   .result-summary .summary-row { display:flex; padding:8px 0; border-bottom:1px dashed rgba(15,23,42,0.03); align-items:center }
@@ -1141,15 +1156,39 @@
       $('#ordersTableSummary').text('Total Amount\t' + total);
       $('#tableEntriesNote').text('Showing 1 to ' + (lineItems.length || 0) + ' of ' + (lineItems.length || 0) + ' entries');
 
-      // Populate detail chips
+      // Populate contact details in the right panel
       try {
         var emailVal = (orderData.orders && (orderData.orders.email || orderData.orders.customer_email)) || '—';
         var phoneVal = (orderData.orders && (orderData.orders.phone || (orderData.orders.shipping_address && orderData.orders.shipping_address.phone) || (orderData.orders.billing_address && orderData.orders.billing_address.phone))) || '—';
-        $('#detailEmail').text(emailVal || '—');
-        $('#detailPhone').text(phoneVal || '—');
+        $('#contactEmail').text(emailVal || '—');
+        $('#contactPhone').text(phoneVal || '—');
       } catch(e) {
-        $('#detailEmail').text('—');
-        $('#detailPhone').text('—');
+        $('#contactEmail').text('—');
+        $('#contactPhone').text('—');
+      }
+
+      // Populate shipping address inline next to the carrier link
+      try {
+        var a = orderData.orders && orderData.orders.shipping_address;
+        var lines = [];
+        if (a && typeof a === 'object') {
+          var name = a.name || a.first_name && a.last_name ? (a.first_name + ' ' + a.last_name) : '';
+          if (name) lines.push(name);
+          if (a.address1) lines.push(a.address1);
+          if (a.address2) lines.push(a.address2);
+          var cityLine = [a.city, a.province, a.zip].filter(Boolean).join(', ');
+          if (cityLine) lines.push(cityLine);
+          if (a.country) lines.push(a.country);
+          if (a.phone) lines.push('Phone: ' + a.phone);
+        } else if (a && typeof a === 'string') {
+          lines = [String(a)];
+        }
+        var $addr = $('#shipAddressInline');
+        $addr.empty();
+        if (lines.length === 0) { $addr.append('<div class="address-line">—</div>'); }
+        else { lines.forEach(function(l){ $addr.append('<div class="address-line">' + l + '</div>'); }); }
+      } catch(e) {
+        $('#shipAddressInline').html('<div class="address-line">—</div>');
       }
 
       // Removed auto-scroll to avoid unexpected page jumps after rendering
@@ -1255,22 +1294,32 @@
     </div>
 
     <div id="orderDetails" style="display: none;">
-      <!-- Top card: Track your Order -->
-      <div class="result-card" style="padding:18px; margin-bottom:12px;">
-        <div class="track-header" style="width:100%">
-          <h3 style="margin:0 0 6px 0;font-size:18px;color:#111827">Track your Order</h3>
-          <div class="order-code" style="font-size:13px;color:#374151">Order ID: <span id="trackOrderCode">—</span></div>
-        </div>
+      <!-- Top card: order id + contact/address + carrier block -->
+      <div class="result-card" style="padding:12px; margin-bottom:8px;">
         <div style="text-align:center;width:100%; margin-top:8px">
           <!-- Progress bar is rendered above page-wide and reused here -->
         </div>
         <div style="width:100%; margin-top:6px; color:#0f172a; font-size:13px">
-          <div id="statusLine" style="margin-bottom:2px">&nbsp;</div>
-          <div id="carrierLine" style="color:#6b7280">&nbsp;</div>
-        </div>
-        <div class="details-row">
-          <div class="detail-chip"><span class="key">Email:</span><span id="detailEmail">—</span></div>
-          <div class="detail-chip"><span class="key">Contact no:</span><span id="detailPhone">—</span></div>
+          <div class="order-id-line">Order ID: <span id="trackOrderCode">—</span></div>
+          <div class="link-and-address">
+            <div class="right-stack">
+              <aside class="inline-contact">
+                <h5>Contact details</h5>
+                <div class="address-line"><strong>Email:</strong> <span id="contactEmail">—</span></div>
+                <div class="address-line"><strong>Contact no:</strong> <span id="contactPhone">—</span></div>
+              </aside>
+              <aside class="inline-address">
+                <h5>Shipping address</h5>
+                <div id="shipAddressInline">
+                  <div class="address-line">—</div>
+                </div>
+              </aside>
+            </div>
+          </div>
+          <div class="carrier-block">
+            <div id="statusLine" style="margin-bottom:6px">&nbsp;</div>
+            <div id="carrierLine" style="color:#6b7280">&nbsp;</div>
+          </div>
         </div>
         <div id="statusWarning" class="alert alert-warning" style="display:none"></div>
       </div>
@@ -1287,9 +1336,6 @@
               <option value="50">50</option>
             </select>
             <span>entries</span>
-          </div>
-          <div class="right">
-            <input id="tableSearch" type="text" placeholder="Search" aria-label="Search table">
           </div>
         </div>
         <div style="overflow:auto">
