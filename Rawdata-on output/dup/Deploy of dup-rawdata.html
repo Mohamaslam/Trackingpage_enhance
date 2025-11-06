@@ -1,7 +1,7 @@
 <style>
   /* Page background and shell to match sample image */
   body { background: #e9f0f7; }
-  .page-shell { max-width: 1200px; margin: 28px auto; padding: 28px; box-sizing: border-box }
+  .page-shell { max-width: 1000px; margin: 28px auto; padding: 28px; box-sizing: border-box }
   .content-card {
     background: #f8fafc; /* very light gray outer card */
     border-radius: 18px;
@@ -29,7 +29,7 @@
     color: rgb(var(--color-foreground) / .6);
   }
 
-  #renderResponse .Segment__Title {
+  #renderResponse .Segment__Title { 
     margin-bottom: 14px;
   }
 
@@ -386,6 +386,13 @@
   /* order id line in top card */
   .order-id-line { font-size:16px; font-weight:800; color:#111827; margin:0 0 4px 0 }
   .order-id-line #trackOrderCode { font-weight:900 }
+  /* shipping details card layout */
+  .info-card { background:#fff; border:1px solid #e6e9ee; border-radius:10px; padding:12px }
+  .info-card .card-title { margin:0 0 10px 0; font-size:16px; color:#0f172a }
+  .info-grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; align-items:stretch; grid-auto-rows: 1fr }
+  .info-section { background:#f9fafb; border:1px solid #e6e9ee; border-radius:10px; padding:12px; display:flex; flex-direction:column; height:100% }
+  .info-section h5 { margin:0 0 6px 0; font-size:14px; color:#0f172a }
+  .col-span-2 { grid-column: 1 / -1 }
   /* inline address next to carrier link */
   .link-and-address { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-top:8px; flex-wrap:wrap }
   .right-stack { display:flex; flex-direction:row; gap:12px; align-items:stretch; min-width:260px; flex-wrap:wrap }
@@ -443,6 +450,7 @@
     /* Make cancel button easier to tap */
     #cancelTracking { width: 100%; }
     .tracking-form-card input.input { padding: 12px 12px; font-size: 16px; }
+    .info-grid { grid-template-columns: 1fr }
   }
   @media (max-width: 420px) {
     .page-shell { padding: 10px; }
@@ -1301,24 +1309,26 @@
         </div>
         <div style="width:100%; margin-top:6px; color:#0f172a; font-size:13px">
           <div class="order-id-line">Order ID: <span id="trackOrderCode">—</span></div>
-          <div class="link-and-address">
-            <div class="right-stack">
-              <aside class="inline-contact">
-                <h5>Contact details</h5>
-                <div class="address-line"><strong>Email:</strong> <span id="contactEmail">—</span></div>
-                <div class="address-line"><strong>Contact no:</strong> <span id="contactPhone">—</span></div>
-              </aside>
-              <aside class="inline-address">
+          <div class="info-card">
+            <h4 class="card-title">Shipping details</h4>
+            <div class="info-grid">
+              <section class="info-section">
                 <h5>Shipping address</h5>
                 <div id="shipAddressInline">
                   <div class="address-line">—</div>
                 </div>
-              </aside>
+              </section>
+              <section class="info-section">
+                <h5>Contact</h5>
+                <div class="address-line"><strong>Email:</strong> <span id="contactEmail">—</span></div>
+                <div class="address-line"><strong>Contact no:</strong> <span id="contactPhone">—</span></div>
+              </section>
+              <section class="info-section col-span-2">
+                <h5>Carrier</h5>
+                <div id="statusLine" style="margin-bottom:6px">&nbsp;</div>
+                <div id="carrierLine" style="color:#6b7280">&nbsp;</div>
+              </section>
             </div>
-          </div>
-          <div class="carrier-block">
-            <div id="statusLine" style="margin-bottom:6px">&nbsp;</div>
-            <div id="carrierLine" style="color:#6b7280">&nbsp;</div>
           </div>
         </div>
         <div id="statusWarning" class="alert alert-warning" style="display:none"></div>
