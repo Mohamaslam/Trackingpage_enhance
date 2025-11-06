@@ -1,7 +1,7 @@
 <style>
   /* Page background and shell to match sample image */
   body { background: #e9f0f7; }
-  .page-shell { max-width: 1200px; margin: 28px auto; padding: 28px; box-sizing: border-box }
+  .page-shell { max-width: 1100px; margin: 28px auto; padding: 28px; box-sizing: border-box }
   .content-card {
     background: #f8fafc; /* very light gray outer card */
     border-radius: 18px;
@@ -126,7 +126,7 @@
     width: 0%;
     background: linear-gradient(90deg,#10b981,#16a34a); /* soft green gradient */
     border-radius: 6px;
-    transition: width 2200ms cubic-bezier(.2,.8,.2,1);
+    transition: width 4500ms cubic-bezier(.2,.8,.2,1);
     z-index: 3; /* above markers so fill can visually cover markers when active */
   }
   .order-track-fill .flow{position:absolute;left:-40%;top:0;bottom:0;width:60%;background:linear-gradient(90deg,rgba(255,255,255,0.18),rgba(255,255,255,0.02),rgba(255,255,255,0.18));opacity:0.55;animation:flow 1.2s linear infinite}
@@ -196,14 +196,13 @@
   .order-marker .marker-label{
     display:block;
     margin-top:40px; /* push text further down below the pill */
-    font-size:15px; /* slightly larger for clarity */
+    font-size:15px; /* larger for clarity */
     color:#111827; /* darker for better contrast */
-    font-weight:600;
-    line-height:1.1;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    max-width:72px; /* keep label compact under each marker */
+    font-weight:700; /* bolder for visibility */
+    line-height:1.2;
+    white-space:normal; /* allow wrapping for long labels */
+    overflow:visible; /* show full text */
+    max-width:120px; /* give labels more room */
     display:inline-block;
     text-align:center;
     position:relative;
@@ -311,6 +310,17 @@
   }
   .btn-primary-custom:disabled { opacity: 0.6; cursor: not-allowed }
 
+   /* secondary button */
+   .btn-secondary-custom {
+     background: #ffffff;
+     color: #0f172a;
+     border: 1px solid #e6e9ee;
+     padding: 9px 12px;
+     border-radius: 8px;
+     font-weight: 700;
+     cursor: pointer;
+   }
+
   /* form fields spacing inside card */
   .tracking-form-card .field { margin-bottom: 8px }
   .tracking-form-card label.label { display:block; margin-bottom:6px; font-size:13px; color:#334155 }
@@ -367,11 +377,11 @@
 
   /* Center labels and increase font sizes for readability */
   .result-card h3 { font-size: 20px; text-align: center; margin-bottom: 10px }
-  .result-summary { text-align: center; background:#f9fafb; border:1px solid #eef2f7; border-radius:10px; padding:12px 14px; }
+  .result-summary { text-align: center; background:#f9fafb; border:1px solid #eef2f7; border-radius:10px; padding:14px 16px; }
   .result-summary .summary-row { justify-content: center; }
-  .result-summary .summary-key { font-size: 14px; color: #475569; flex: 0 0 50%; text-align: center }
-  .result-summary .summary-val { font-size: 16px; color: #0f172a; font-weight: 800; flex: 0 0 50%; text-align: center }
-  .result-summary h4 { font-size: 16px; text-align: center; margin-bottom:6px }
+  .result-summary .summary-key { font-size: 15px; color: #334155; font-weight:700; flex: 0 0 50%; text-align: center }
+  .result-summary .summary-val { font-size: 17px; color: #0f172a; font-weight: 900; flex: 0 0 50%; text-align: center }
+  .result-summary h4 { font-size: 17px; font-weight:800; text-align: center; margin-bottom:8px }
 
   .tracking-timeline { list-style:none; margin:0; padding:0; }
   .tracking-timeline li { padding:8px 6px; border-left:3px solid transparent; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center }
@@ -384,6 +394,27 @@
   @media (max-width: 780px) {
     .result-card { grid-template-columns: 1fr; }
     .result-summary { order: 2 }
+  }
+
+  /* Responsive tweaks for tablets and phones */
+  @media (max-width: 680px) {
+    .page-shell { padding: 14px; }
+    .content-card { padding: 16px; border-radius: 12px; }
+    .current-step-label { font-size: 12px; }
+    .order-marker .marker-label { font-size: 12px; margin-top: 32px; max-width: 88px; line-height: 1.25; }
+    .result-card h3 { font-size: 16px; }
+    .result-summary { padding: 10px 12px; }
+    .result-summary .summary-key { font-size: 13px; }
+    .result-summary .summary-val { font-size: 15px; }
+    .table-toolbar { flex-direction: column; align-items: stretch; gap: 6px; }
+    .table-toolbar .left { justify-content: flex-start; }
+    .orders-table thead th, .orders-table tbody td { padding: 8px 8px; }
+  }
+  @media (max-width: 420px) {
+    .page-shell { padding: 10px; }
+    .order-marker .marker-label { font-size: 11px; max-width: 76px; margin-top: 30px; }
+    .result-summary .summary-key { font-size: 12px; }
+    .result-summary .summary-val { font-size: 14px; }
   }
 </style>
 
@@ -587,7 +618,7 @@
           $('#orderProgress .order-marker').eq(0).addClass('active');
         }
         // monitor fill and activate markers exactly when the fill passes each marker
-        monitorFillAndActivateMarkers(fillEl, track, activeIndex, 2200);
+        monitorFillAndActivateMarkers(fillEl, track, activeIndex, 4500);
       }, 10);
     }
 
@@ -617,7 +648,7 @@
       markers.removeClass('active');
       // defensive
       if (!markers || markers.length === 0) return;
-      durationMs = durationMs || 2200;
+      durationMs = durationMs || 4500;
       var effectiveTarget = Math.max(0, Math.min(markers.length - 1, targetIndex));
       if (effectiveTarget === 0) {
         // show first marker immediately
@@ -678,7 +709,7 @@
       // determine duration from computed style if possible
       var cssDur = null;
       try { cssDur = parseCssTimeToMs(window.getComputedStyle(fillEl[0]).transitionDuration); } catch (e) { cssDur = null; }
-      var durationMs = cssDur || fallbackDurationMs || 2200;
+      var durationMs = cssDur || fallbackDurationMs || 4500;
 
   var activated = new Array(markers.length).fill(false);
   // preserve any already-active markers (e.g., timestamp-driven or pre-activated)
@@ -807,7 +838,7 @@
       // animate fill
       fill.css('width', percent + '%');
       // activate markers in sync with actual fill movement
-      monitorFillAndActivateMarkers(fill, track, targetIndex, 2200);
+      monitorFillAndActivateMarkers(fill, track, targetIndex, 4500);
       // slightly normalize scale after transition (maintain rotation state)
       setTimeout(function () {
         if (emoji.hasClass('truck')) {
@@ -816,7 +847,7 @@
         } else {
           emoji.css('transform', 'translateX(-50%) scale(1.15)');
         }
-      }, 3800); // match CSS transition time
+      }, 6500); // match slower CSS transition time
     }
 
     // Build progress DOM without animating (used before server response)
@@ -878,9 +909,9 @@
           } else {
             emoji.css('transform', 'translateX(-50%) scale(1)');
           }
-        }, 3800); // match CSS transition time
+        }, 6500); // match slower CSS transition time
         idx = (idx + 1) % markers.length;
-      }, 4200); // interval slightly larger than transition for smooth pacing
+      }, 7000); // interval larger than transition for smooth pacing
     }
 
     function stopIndeterminateProgress() {
@@ -909,18 +940,18 @@
             // nothing in the future: ensure markers up to activeStep are visible and synced with fill
             var _track = $('#orderProgress .order-track');
             var _fill = _track.find('.order-track-fill');
-            monitorFillAndActivateMarkers(_fill, _track, activeStep, 2200);
+      monitorFillAndActivateMarkers(_fill, _track, activeStep, 4500);
           }
         } else {
           var _track = $('#orderProgress .order-track');
           var _fill = _track.find('.order-track-fill');
-          monitorFillAndActivateMarkers(_fill, _track, activeStep, 2200);
+          monitorFillAndActivateMarkers(_fill, _track, activeStep, 4500);
         }
       } catch (e) {
         console.warn('Error scheduling timestamp activations, falling back to proportional schedule', e);
         var _track = $('#orderProgress .order-track');
         var _fill = _track.find('.order-track-fill');
-        monitorFillAndActivateMarkers(_fill, _track, activeStep, 2200);
+        monitorFillAndActivateMarkers(_fill, _track, activeStep, 4500);
       }
 
     // diagnostics removed from UI per request (no raw/derived data displayed)
@@ -1067,10 +1098,12 @@
     }
 
     // ---------- Event Handlers ----------
-    $("#closeCurrent").click(function (e) {
-      // stop any running animation
+    // Cancel button performs the same reset as close
+    $("#cancelTracking").click(function (e) {
       stopIndeterminateProgress();
       clearProgressAnimation();
+      $('#orderProgressContainer').hide();
+      try { $('#currentStepLabel').text(''); } catch(err) {}
       $("#renderResponse").hide();
       $("#orderForm").show();
       $("#orderNumber, #email").val('');
@@ -1153,12 +1186,8 @@
   </form>
 
   <div id="renderResponse" class="ProductItem__Wrapper w-100" style="display: none;">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
-      <button id="closeCurrent" class="button button--secondary button--close items-center justify-center" type="button" is="hover-button" aria-label="Close">
-        <span class="btn-text"><svg class="icon icon-close icon-sm" viewBox="0 0 20 20" stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M5 15L15 5M5 5L15 15"></path>
-        </svg></span>
-      </button>
+    <div style="display:flex;justify-content:flex-start;align-items:center;margin-bottom:8px">
+      <button id="cancelTracking" class="btn-secondary-custom" type="button" aria-label="Cancel and track another">Cancel and track another</button>
     </div>
 
     <div id="orderDetails" style="display: none;">
