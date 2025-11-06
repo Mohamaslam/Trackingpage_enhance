@@ -1026,6 +1026,8 @@
         }
       }
       if (trackingUrl) {
+        // Replace the previous heading with a clear instruction and a down finger emoji
+        $('#statusLine').html('Use this link <span aria-hidden="true">👇</span>');
         $('#carrierLine').html('<a class="carrier-link" href="' + String(trackingUrl) + '" target="_blank" rel="noopener"><span class="emoji">🚚</span><span>Track on carrier site</span></a>');
       } else {
         $('#carrierLine').text(carrierText);
