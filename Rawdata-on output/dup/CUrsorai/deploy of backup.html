@@ -1,7 +1,7 @@
 <style>
   /* Page background and shell to match sample image */
   body { background: #e9f0f7; }
-  .page-shell { max-width: 1200px; margin: 28px auto; padding: 28px; box-sizing: border-box }
+  .page-shell { max-width: 1100px; margin: 28px auto; padding: 28px; box-sizing: border-box }
   .content-card {
     background: #f8fafc; /* very light gray outer card */
     border-radius: 18px;
@@ -126,7 +126,7 @@
     width: 0%;
     background: linear-gradient(90deg,#10b981,#16a34a); /* soft green gradient */
     border-radius: 6px;
-    transition: width 2200ms cubic-bezier(.2,.8,.2,1);
+    transition: width 4500ms cubic-bezier(.2,.8,.2,1);
     z-index: 3; /* above markers so fill can visually cover markers when active */
   }
   .order-track-fill .flow{position:absolute;left:-40%;top:0;bottom:0;width:60%;background:linear-gradient(90deg,rgba(255,255,255,0.18),rgba(255,255,255,0.02),rgba(255,255,255,0.18));opacity:0.55;animation:flow 1.2s linear infinite}
@@ -196,14 +196,13 @@
   .order-marker .marker-label{
     display:block;
     margin-top:40px; /* push text further down below the pill */
-    font-size:15px; /* slightly larger for clarity */
+    font-size:15px; /* larger for clarity */
     color:#111827; /* darker for better contrast */
-    font-weight:600;
-    line-height:1.1;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    max-width:72px; /* keep label compact under each marker */
+    font-weight:700; /* bolder for visibility */
+    line-height:1.2;
+    white-space:normal; /* allow wrapping for long labels */
+    overflow:visible; /* show full text */
+    max-width:120px; /* give labels more room */
     display:inline-block;
     text-align:center;
     position:relative;
@@ -311,6 +310,17 @@
   }
   .btn-primary-custom:disabled { opacity: 0.6; cursor: not-allowed }
 
+   /* secondary button */
+   .btn-secondary-custom {
+     background: #ffffff;
+     color: #0f172a;
+     border: 1px solid #e6e9ee;
+     padding: 9px 12px;
+     border-radius: 8px;
+     font-weight: 700;
+     cursor: pointer;
+   }
+
   /* form fields spacing inside card */
   .tracking-form-card .field { margin-bottom: 8px }
   .tracking-form-card label.label { display:block; margin-bottom:6px; font-size:13px; color:#334155 }
@@ -355,6 +365,10 @@
   .pager button { border:1px solid #e6e9ee; background:#fff; border-radius:6px; padding:6px 10px; font-size:12px; color:#0f172a; cursor:pointer }
   .pager .current { background:#eef2ff; color:#4338ca; border-color:#c7d2fe }
 
+  /* subtle warning banner */
+  .alert { padding:10px 12px; border-radius:8px; font-size:13px; margin-top:8px }
+  .alert-warning { background:#fff7ed; color:#9a3412; border:1px solid #fed7aa }
+
   .result-summary { padding: 8px 12px; width: 100%; max-width: 720px; margin: 0 auto; text-align: left; }
   .result-summary .summary-row { display:flex; padding:8px 0; border-bottom:1px dashed rgba(15,23,42,0.03); align-items:center }
   .result-summary .summary-row:last-child { border-bottom: none; }
@@ -363,11 +377,11 @@
 
   /* Center labels and increase font sizes for readability */
   .result-card h3 { font-size: 20px; text-align: center; margin-bottom: 10px }
-  .result-summary { text-align: center; background:#f9fafb; border:1px solid #eef2f7; border-radius:10px; padding:12px 14px; }
+  .result-summary { text-align: center; background:#f9fafb; border:1px solid #eef2f7; border-radius:10px; padding:14px 16px; }
   .result-summary .summary-row { justify-content: center; }
-  .result-summary .summary-key { font-size: 14px; color: #475569; flex: 0 0 50%; text-align: center }
-  .result-summary .summary-val { font-size: 16px; color: #0f172a; font-weight: 800; flex: 0 0 50%; text-align: center }
-  .result-summary h4 { font-size: 16px; text-align: center; margin-bottom:6px }
+  .result-summary .summary-key { font-size: 15px; color: #334155; font-weight:700; flex: 0 0 50%; text-align: center }
+  .result-summary .summary-val { font-size: 17px; color: #0f172a; font-weight: 900; flex: 0 0 50%; text-align: center }
+  .result-summary h4 { font-size: 17px; font-weight:800; text-align: center; margin-bottom:8px }
 
   .tracking-timeline { list-style:none; margin:0; padding:0; }
   .tracking-timeline li { padding:8px 6px; border-left:3px solid transparent; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center }
@@ -380,6 +394,27 @@
   @media (max-width: 780px) {
     .result-card { grid-template-columns: 1fr; }
     .result-summary { order: 2 }
+  }
+
+  /* Responsive tweaks for tablets and phones */
+  @media (max-width: 680px) {
+    .page-shell { padding: 14px; }
+    .content-card { padding: 16px; border-radius: 12px; }
+    .current-step-label { font-size: 12px; }
+    .order-marker .marker-label { font-size: 12px; margin-top: 32px; max-width: 88px; line-height: 1.25; }
+    .result-card h3 { font-size: 16px; }
+    .result-summary { padding: 10px 12px; }
+    .result-summary .summary-key { font-size: 13px; }
+    .result-summary .summary-val { font-size: 15px; }
+    .table-toolbar { flex-direction: column; align-items: stretch; gap: 6px; }
+    .table-toolbar .left { justify-content: flex-start; }
+    .orders-table thead th, .orders-table tbody td { padding: 8px 8px; }
+  }
+  @media (max-width: 420px) {
+    .page-shell { padding: 10px; }
+    .order-marker .marker-label { font-size: 11px; max-width: 76px; margin-top: 30px; }
+    .result-summary .summary-key { font-size: 12px; }
+    .result-summary .summary-val { font-size: 14px; }
   }
 </style>
 
@@ -405,9 +440,9 @@
     }
 
     // Progress stepper renderer
-    // Use a 4-step sequence that matches the server's shipment_status values:
-    // 0: Ordered, 1: Shipped, 2: In transit, 3: Delivered
-    var defaultSteps = ['Ordered', 'Shipped', 'In transit', 'Delivered'];
+    // Use a 5-step sequence:
+    // 0: Ordered, 1: Pickup scheduled, 2: In transit, 3: Out for delivery, 4: Delivered
+    var defaultSteps = ['Ordered', 'Pickup scheduled', 'In transit', 'Out for delivery', 'Delivered'];
 
     // Map known tokens to the 4-step index. We use ordered checks so more specific tokens
     // are matched first. 'Out for delivery' will be treated as 'In transit' (index 2)
@@ -418,9 +453,10 @@
       // exact/common tokens -> index
       var mappings = [
         { tokens: ['ordered','placed','processing','pending'], idx: 0 },
-        { tokens: ['shipped','dispatched'], idx: 1 },
-        { tokens: ['in transit','in_transit','transit','out for delivery','out_for_delivery','on the way','on its way'], idx: 2 },
-        { tokens: ['delivered','complete','fulfilled','completed','delivered_successfully'], idx: 3 }
+        { tokens: ['pickup scheduled','pickup','pickup_scheduled','pickupscheduled'], idx: 1 },
+        { tokens: ['in transit','in_transit','transit','on the way','on its way'], idx: 2 },
+        { tokens: ['out for delivery','out_for_delivery'], idx: 3 },
+        { tokens: ['delivered','complete','fulfilled','completed','delivered_successfully'], idx: 4 }
       ];
       for (var i = 0; i < mappings.length; i++) {
         var entry = mappings[i];
@@ -464,39 +500,56 @@
       return null;
     }
 
-    // Derive shipment status from fulfillment fields when present, but if shipment_status
-    // is missing, scan the fulfillment object for any string field containing a known token.
-    // As a last resort, check order-level fulfillment_status but only if it contains known tokens.
+    // Collect all possible status candidates from the response and choose the most advanced step.
     function deriveProgressStatus(orderData) {
       if (!orderData) return null;
-      var knownTokens = ['pending','processing','shipped','dispatched','in transit','in_transit','transit','out for delivery','out_for_delivery','on the way','delivered','complete','fulfilled'];
+      var candidates = [];
+      var pushIf = function(v){ if (v && String(v).trim()) candidates.push(String(v)); };
+      // fulfillment-level fields
       if (orderData.fulfillments && orderData.fulfillments.length > 0) {
-        var f = orderData.fulfillments[0];
-        if (f) {
-          if (f.shipment_status) return String(f.shipment_status);
-          if (f.status) return String(f.status);
-          if (f.tracking_status) return String(f.tracking_status);
-          if (f.fulfillment_status) return String(f.fulfillment_status);
-          // infer from tracking numbers / urls when explicit shipment_status is missing
-          if (f.tracking_numbers && f.tracking_numbers.length > 0) return 'in transit';
-          if (f.tracking_urls && f.tracking_urls.length > 0) return 'in transit';
-          // scan other fields of fulfillment for any known token
-          var scanned = scanForKnownTokensInObject(f, knownTokens);
-          if (scanned) return String(scanned);
+        var f = orderData.fulfillments[0] || {};
+        pushIf(f.shipment_status);
+        pushIf(f.status);
+        pushIf(f.tracking_status);
+        pushIf(f.fulfillment_status);
+        // events/history often contains the ground truth from carrier
+        var events = f.events || f.history || f.tracking_events || null;
+        if (Array.isArray(events)) {
+          for (var ei=0; ei<events.length; ei++) {
+            var ev = events[ei] || {};
+            pushIf(ev.status || ev.name || ev.event || ev.description);
+          }
+        }
+        // only as absolute last resort, infer transit from tracking numbers when NO other signals present
+        if (candidates.length === 0) {
+          if (f.tracking_numbers && f.tracking_numbers.length > 0) pushIf('in transit');
+          if (f.tracking_urls && f.tracking_urls.length > 0) pushIf('in transit');
         }
       }
-      // order-level fallback
+      // order-level fields
       if (orderData.orders) {
-        if (orderData.orders.fulfillment_status) {
-          var cand = String(orderData.orders.fulfillment_status);
-          var found = scanForKnownTokensInObject(cand, knownTokens);
-          if (found) return cand;
-        }
-        // also scan other order-level fields
-        var scannedOrder = scanForKnownTokensInObject(orderData.orders, knownTokens);
-        if (scannedOrder) return String(scannedOrder);
+        pushIf(orderData.orders.fulfillment_status);
+        pushIf(orderData.orders.financial_status);
       }
-      return null;
+      // scan objects for any token if still empty
+      if (candidates.length === 0) {
+        var token = scanForKnownTokensInObject(orderData, ['pending','processing','ordered','pickup scheduled','pickup','pickupscheduled','shipped','dispatched','in transit','in_transit','transit','out for delivery','out_for_delivery','on the way','delivered','complete','fulfilled','completed']);
+        pushIf(token);
+      }
+      if (candidates.length === 0) return null;
+      // choose the most advanced mapped step among candidates
+      var bestIdx = 0; var bestRaw = candidates[0];
+      for (var ci=0; ci<candidates.length; ci++) {
+        var idx = mapShipmentStatusToStep(candidates[ci]);
+        if (idx > bestIdx) { bestIdx = idx; bestRaw = candidates[ci]; }
+        // if any candidate clearly indicates delivered, short-circuit
+        var low = String(candidates[ci]).toLowerCase();
+        if (low.indexOf('delivered') !== -1 || low.indexOf('fulfilled') !== -1 || low.indexOf('complete') !== -1 || low.indexOf('completed') !== -1) {
+          bestIdx = 4; bestRaw = candidates[ci]; break;
+        }
+      }
+      // return the raw best candidate string; rendering will map to step
+      return String(bestRaw);
     }
 
     // Detect if we inferred the status from tracking numbers/urls so diagnostics can show the source
@@ -565,7 +618,7 @@
           $('#orderProgress .order-marker').eq(0).addClass('active');
         }
         // monitor fill and activate markers exactly when the fill passes each marker
-        monitorFillAndActivateMarkers(fillEl, track, activeIndex, 2200);
+        monitorFillAndActivateMarkers(fillEl, track, activeIndex, 4500);
       }, 10);
     }
 
@@ -595,7 +648,7 @@
       markers.removeClass('active');
       // defensive
       if (!markers || markers.length === 0) return;
-      durationMs = durationMs || 2200;
+      durationMs = durationMs || 4500;
       var effectiveTarget = Math.max(0, Math.min(markers.length - 1, targetIndex));
       if (effectiveTarget === 0) {
         // show first marker immediately
@@ -656,7 +709,7 @@
       // determine duration from computed style if possible
       var cssDur = null;
       try { cssDur = parseCssTimeToMs(window.getComputedStyle(fillEl[0]).transitionDuration); } catch (e) { cssDur = null; }
-      var durationMs = cssDur || fallbackDurationMs || 2200;
+      var durationMs = cssDur || fallbackDurationMs || 4500;
 
   var activated = new Array(markers.length).fill(false);
   // preserve any already-active markers (e.g., timestamp-driven or pre-activated)
@@ -785,7 +838,7 @@
       // animate fill
       fill.css('width', percent + '%');
       // activate markers in sync with actual fill movement
-      monitorFillAndActivateMarkers(fill, track, targetIndex, 2200);
+      monitorFillAndActivateMarkers(fill, track, targetIndex, 4500);
       // slightly normalize scale after transition (maintain rotation state)
       setTimeout(function () {
         if (emoji.hasClass('truck')) {
@@ -794,7 +847,7 @@
         } else {
           emoji.css('transform', 'translateX(-50%) scale(1.15)');
         }
-      }, 3800); // match CSS transition time
+      }, 6500); // match slower CSS transition time
     }
 
     // Build progress DOM without animating (used before server response)
@@ -856,9 +909,9 @@
           } else {
             emoji.css('transform', 'translateX(-50%) scale(1)');
           }
-        }, 3800); // match CSS transition time
+        }, 6500); // match slower CSS transition time
         idx = (idx + 1) % markers.length;
-      }, 4200); // interval slightly larger than transition for smooth pacing
+      }, 7000); // interval larger than transition for smooth pacing
     }
 
     function stopIndeterminateProgress() {
@@ -887,18 +940,18 @@
             // nothing in the future: ensure markers up to activeStep are visible and synced with fill
             var _track = $('#orderProgress .order-track');
             var _fill = _track.find('.order-track-fill');
-            monitorFillAndActivateMarkers(_fill, _track, activeStep, 2200);
+      monitorFillAndActivateMarkers(_fill, _track, activeStep, 4500);
           }
         } else {
           var _track = $('#orderProgress .order-track');
           var _fill = _track.find('.order-track-fill');
-          monitorFillAndActivateMarkers(_fill, _track, activeStep, 2200);
+          monitorFillAndActivateMarkers(_fill, _track, activeStep, 4500);
         }
       } catch (e) {
         console.warn('Error scheduling timestamp activations, falling back to proportional schedule', e);
         var _track = $('#orderProgress .order-track');
         var _fill = _track.find('.order-track-fill');
-        monitorFillAndActivateMarkers(_fill, _track, activeStep, 2200);
+        monitorFillAndActivateMarkers(_fill, _track, activeStep, 4500);
       }
 
     // diagnostics removed from UI per request (no raw/derived data displayed)
@@ -940,13 +993,70 @@
         var tn = (f0.tracking_numbers && f0.tracking_numbers[0]) || '';
         if (carrier || tn) carrierText = (carrier ? carrier : 'Tracking number') + (tn ? ' (tracking number ' + tn + ')' : '');
       }
-      $('#carrierLine').text(carrierText);
+      // If a direct tracking URL exists, show a link labeled "Carrier site tracking"
+      var trackingUrl = null;
+      if (orderData.fulfillments && orderData.fulfillments.length > 0) {
+        var fForUrl = orderData.fulfillments[0] || {};
+        if (Array.isArray(fForUrl.tracking_urls) && fForUrl.tracking_urls.length > 0) {
+          trackingUrl = fForUrl.tracking_urls[0];
+        } else if (typeof fForUrl.tracking_url === 'string' && fForUrl.tracking_url) {
+          trackingUrl = fForUrl.tracking_url;
+        }
+      }
+      if (trackingUrl) {
+        $('#carrierLine').html('<a href="' + String(trackingUrl) + '" target="_blank" rel="noopener">Carrier site tracking</a>');
+      } else {
+        $('#carrierLine').text(carrierText);
+      }
+
+      // Detect abnormal/unmapped shipment statuses and surface a warning
+      try {
+        var explicitStatus = null;
+        if (orderData.fulfillments && orderData.fulfillments.length > 0 && orderData.fulfillments[0]) {
+          var ff = orderData.fulfillments[0];
+          explicitStatus = ff.shipment_status || ff.status || ff.tracking_status || ff.fulfillment_status || null;
+        }
+        var rawShown = explicitStatus || progressStatus || null;
+        var normalized = rawShown ? String(rawShown).toLowerCase() : '';
+        var known = ['ordered','placed','processing','pending','pickup scheduled','pickup','pickupscheduled','shipped','dispatched','in transit','in_transit','transit','out for delivery','delivered','complete','fulfilled','completed'];
+        var isKnown = known.some(function(k){ return normalized.indexOf(k) !== -1; });
+        var warn = false;
+        // warn if we had some status string but it didn't map to a known token set
+        if (rawShown && !isKnown) warn = true;
+        // also warn if explicit status exists but maps to the first step while not a first-step token
+        if (explicitStatus && activeStep === 0) {
+          var firstStepTokens = ['ordered','placed','processing','pending'];
+          var isFirst = firstStepTokens.some(function(k){ return normalized.indexOf(k) !== -1; });
+          if (!isFirst) warn = true;
+        }
+        if (warn) {
+          $('#statusWarning').html('Unexpected shipment status from API: "' + String(rawShown) + '". Showing best-effort mapping.').show();
+          console.warn('Unexpected shipment status from API:', rawShown, { explicitStatus: explicitStatus, derived: progressStatus, mappedStep: activeStep });
+        } else {
+          $('#statusWarning').hide().empty();
+        }
+      } catch (diagErr) {
+        console.warn('Status diagnostics failed', diagErr);
+      }
 
       // Build the table rows for All Orders section (single order view)
       var $tbody = $('#ordersTableBody');
       $tbody.empty();
       var lineItems = (orderData.orders && orderData.orders.line_items) ? orderData.orders.line_items : [];
       var total = 0;
+      // Reflect item count in the "Show entries" select
+      try {
+        var itemCount = lineItems.length;
+        var $sel = $('#showEntries');
+        if ($sel.length) {
+          if ($sel.find('option[value="' + itemCount + '"]').length === 0) {
+            // add an option matching the exact item count and mark it as selected
+            var $opt = $('<option></option>').attr('value', String(itemCount)).text(String(itemCount));
+            $sel.append($opt);
+          }
+          $sel.val(String(itemCount));
+        }
+      } catch(e) { /* noop */ }
       for (var i = 0; i < lineItems.length; i++) {
         var li = lineItems[i];
         var qty = Number(li.quantity || 1);
@@ -975,8 +1085,8 @@
         var $trEmpty = $('<tr><td colspan="8" style="color:#6b7280">No items</td></tr>');
         $tbody.append($trEmpty);
       }
-      $('#ordersTableSummary').text('Total\t' + total);
-      $('#tableEntriesNote').text('Showing 1 to ' + (lineItems.length || 1) + ' of ' + (lineItems.length || 1) + ' entries');
+      $('#ordersTableSummary').text('Total Amount\t' + total);
+      $('#tableEntriesNote').text('Showing 1 to ' + (lineItems.length || 0) + ' of ' + (lineItems.length || 0) + ' entries');
 
       // Removed auto-scroll to avoid unexpected page jumps after rendering
     }
@@ -988,10 +1098,12 @@
     }
 
     // ---------- Event Handlers ----------
-    $("#closeCurrent").click(function (e) {
-      // stop any running animation
+    // Cancel button performs the same reset as close
+    $("#cancelTracking").click(function (e) {
       stopIndeterminateProgress();
       clearProgressAnimation();
+      $('#orderProgressContainer').hide();
+      try { $('#currentStepLabel').text(''); } catch(err) {}
       $("#renderResponse").hide();
       $("#orderForm").show();
       $("#orderNumber, #email").val('');
@@ -1074,12 +1186,8 @@
   </form>
 
   <div id="renderResponse" class="ProductItem__Wrapper w-100" style="display: none;">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
-      <button id="closeCurrent" class="button button--secondary button--close items-center justify-center" type="button" is="hover-button" aria-label="Close">
-        <span class="btn-text"><svg class="icon icon-close icon-sm" viewBox="0 0 20 20" stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M5 15L15 5M5 5L15 15"></path>
-        </svg></span>
-      </button>
+    <div style="display:flex;justify-content:flex-start;align-items:center;margin-bottom:8px">
+      <button id="cancelTracking" class="btn-secondary-custom" type="button" aria-label="Cancel and track another">Cancel and track another</button>
     </div>
 
     <div id="orderDetails" style="display: none;">
@@ -1087,7 +1195,7 @@
       <div class="result-card" style="padding:18px; margin-bottom:12px;">
         <div class="track-header" style="width:100%">
           <h3 style="margin:0 0 6px 0;font-size:18px;color:#111827">Track your Order</h3>
-          <div class="order-code" style="font-size:13px;color:#374151">Order Code: <span id="trackOrderCode">—</span></div>
+          <div class="order-code" style="font-size:13px;color:#374151">Order ID: <span id="trackOrderCode">—</span></div>
         </div>
         <div style="text-align:center;width:100%; margin-top:8px">
           <!-- Progress bar is rendered above page-wide and reused here -->
@@ -1096,6 +1204,7 @@
           <div id="statusLine" style="margin-bottom:2px">&nbsp;</div>
           <div id="carrierLine" style="color:#6b7280">&nbsp;</div>
         </div>
+        <div id="statusWarning" class="alert alert-warning" style="display:none"></div>
       </div>
 
       <!-- Second card: All Orders table -->
@@ -1120,7 +1229,7 @@
             <thead>
               <tr>
                 <th style="width:60px">#</th>
-                <th>Order Code</th>
+                <th>Order ID</th>
                 <th>Product Name</th>
                 <th style="width:60px">Qty</th>
                 <th style="width:100px">Price</th>
