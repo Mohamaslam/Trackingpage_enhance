@@ -84,7 +84,7 @@
     display: inline-block;
     padding: 3px 8px;
     border-radius: 999px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     line-height: 1;
     color: #fff;
@@ -196,7 +196,7 @@
   .order-marker .marker-label{
     display:block;
     margin-top:40px; /* push text further down below the pill */
-    font-size:15px; /* larger for clarity */
+    font-size:16px; /* larger for clarity */
     color:#111827; /* darker for better contrast */
     font-weight:700; /* bolder for visibility */
     line-height:1.2;
@@ -218,7 +218,7 @@
   /* current step label above track */
   .current-step-label{
     text-align:center;
-    font-size:13px;
+    font-size:15px;
     color:#0f172a;
     font-weight:700;
     margin: 0 0 6px 0;
@@ -294,8 +294,8 @@
     margin-bottom: 8px;
   }
 
-  .tracking-form-card h3 { margin: 0 0 6px 0; font-size: 17px; color: #0f172a }
-  .tracking-form-card p.lead { margin: 0 0 8px 0; color: #475569; font-size: 13px }
+  .tracking-form-card h3 { margin: 0 0 6px 0; font-size: 18px; color: #0f172a }
+  .tracking-form-card p.lead { margin: 0 0 8px 0; color: #475569; font-size: 14px }
 
   /* nicer primary button */
   .btn-primary-custom {
@@ -323,7 +323,7 @@
 
   /* form fields spacing inside card */
   .tracking-form-card .field { margin-bottom: 8px }
-  .tracking-form-card label.label { display:block; margin-bottom:6px; font-size:13px; color:#334155 }
+  .tracking-form-card label.label { display:block; margin-bottom:6px; font-size:14px; color:#334155 }
   .tracking-form-card input.input { width:100%; padding:8px 10px; border:1px solid #e6e9ee; border-radius:6px }
 
   /* Compact layout for narrow containers */
@@ -350,13 +350,13 @@
   .table-card { background:#fff; border:1px solid #e6e9ee; border-radius:10px; box-shadow:0 8px 30px rgba(15,23,42,0.04); padding:14px }
   .table-card h4 { margin:0 0 10px 0; font-size:16px; color:#0f172a }
   .table-toolbar { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px }
-  .table-toolbar .left { display:flex; align-items:center; gap:8px; font-size:13px; color:#475569 }
+  .table-toolbar .left { display:flex; align-items:center; gap:8px; font-size:14px; color:#475569 }
   .table-toolbar select, .table-toolbar input { border:1px solid #e6e9ee; border-radius:6px; padding:6px 8px; font-size:13px; background:#fff; color:#0f172a }
-  .orders-table { width:100%; border-collapse:separate; border-spacing:0; font-size:13px }
+  .orders-table { width:100%; border-collapse:separate; border-spacing:0; font-size:14px }
   .orders-table thead th { text-align:left; color:#475569; background:#f9fafb; border-bottom:1px solid #e6e9ee; padding:10px 10px; font-weight:600 }
   .orders-table tbody td { padding:12px 10px; border-bottom:1px solid #eef2f7; color:#0f172a }
   .orders-table tfoot td { padding:10px; color:#6b7280; font-size:12px }
-  .badge-pill { display:inline-block; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:700; color:#fff }
+  .badge-pill { display:inline-block; padding:6px 12px; border-radius:999px; font-size:13px; font-weight:700; color:#fff }
   .badge-gray { background:#9ca3af }
   .badge-indigo { background:#818cf8 }
   .badge-green { background:#34d399 }
@@ -369,6 +369,19 @@
   .alert { padding:10px 12px; border-radius:8px; font-size:13px; margin-top:8px }
   .alert-warning { background:#fff7ed; color:#9a3412; border:1px solid #fed7aa }
 
+  /* small details chips under status */
+  .details-row { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:8px }
+  .detail-chip { background:#f1f5f9; border:1px solid #e2e8f0; color:#0f172a; border-radius:999px; padding:8px 12px; font-size:14px; font-weight:700 }
+  .detail-chip .key { color:#475569; margin-right:6px }
+
+  /* prominent carrier tracking link */
+  .carrier-link { display:inline-flex; align-items:center; gap:8px; background:#0b63e6; color:#fff !important; text-decoration:none; padding:10px 14px; border-radius:10px; font-size:16px; font-weight:900; box-shadow:0 6px 18px rgba(11,99,230,0.18) }
+  .carrier-link:hover { background:#0657c8 }
+  .carrier-link .emoji { font-size:16px; line-height:1 }
+  /* larger order id text */
+  .track-header .order-code { font-size:18px !important; font-weight:800; color:#111827 !important }
+  .track-header .order-code #trackOrderCode { font-weight:900 }
+
   .result-summary { padding: 8px 12px; width: 100%; max-width: 720px; margin: 0 auto; text-align: left; }
   .result-summary .summary-row { display:flex; padding:8px 0; border-bottom:1px dashed rgba(15,23,42,0.03); align-items:center }
   .result-summary .summary-row:last-child { border-bottom: none; }
@@ -376,12 +389,12 @@
   .result-summary .summary-val { color:#0f172a; font-weight:700; text-align:right; flex: 0 0 45%; }
 
   /* Center labels and increase font sizes for readability */
-  .result-card h3 { font-size: 20px; text-align: center; margin-bottom: 10px }
-  .result-summary { text-align: center; background:#f9fafb; border:1px solid #eef2f7; border-radius:10px; padding:14px 16px; }
+  .result-card h3 { font-size: 22px; text-align: center; margin-bottom: 10px }
+  .result-summary { text-align: center; background:#f9fafb; border:1px solid #eef2f7; border-radius:10px; padding:16px 18px; }
   .result-summary .summary-row { justify-content: center; }
-  .result-summary .summary-key { font-size: 15px; color: #334155; font-weight:700; flex: 0 0 50%; text-align: center }
-  .result-summary .summary-val { font-size: 17px; color: #0f172a; font-weight: 900; flex: 0 0 50%; text-align: center }
-  .result-summary h4 { font-size: 17px; font-weight:800; text-align: center; margin-bottom:8px }
+  .result-summary .summary-key { font-size: 16px; color: #334155; font-weight:700; flex: 0 0 50%; text-align: center }
+  .result-summary .summary-val { font-size: 19px; color: #0f172a; font-weight: 900; flex: 0 0 50%; text-align: center }
+  .result-summary h4 { font-size: 19px; font-weight:800; text-align: center; margin-bottom:8px }
 
   .tracking-timeline { list-style:none; margin:0; padding:0; }
   .tracking-timeline li { padding:8px 6px; border-left:3px solid transparent; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center }
@@ -409,12 +422,21 @@
     .table-toolbar { flex-direction: column; align-items: stretch; gap: 6px; }
     .table-toolbar .left { justify-content: flex-start; }
     .orders-table thead th, .orders-table tbody td { padding: 8px 8px; }
+    /* Hide low-priority payout column on small screens */
+    .orders-table thead th:nth-child(8),
+    .orders-table tbody td:nth-child(8) { display: none; }
+    /* Make cancel button easier to tap */
+    #cancelTracking { width: 100%; }
+    .tracking-form-card input.input { padding: 12px 12px; font-size: 16px; }
   }
   @media (max-width: 420px) {
     .page-shell { padding: 10px; }
     .order-marker .marker-label { font-size: 11px; max-width: 76px; margin-top: 30px; }
     .result-summary .summary-key { font-size: 12px; }
     .result-summary .summary-val { font-size: 14px; }
+    /* On very small screens also hide Order Status column */
+    .orders-table thead th:nth-child(7),
+    .orders-table tbody td:nth-child(7) { display: none; }
   }
 </style>
 
@@ -1004,7 +1026,7 @@
         }
       }
       if (trackingUrl) {
-        $('#carrierLine').html('<a href="' + String(trackingUrl) + '" target="_blank" rel="noopener">Carrier site tracking</a>');
+        $('#carrierLine').html('<a class="carrier-link" href="' + String(trackingUrl) + '" target="_blank" rel="noopener"><span class="emoji">🚚</span><span>Track on carrier site</span></a>');
       } else {
         $('#carrierLine').text(carrierText);
       }
@@ -1087,6 +1109,17 @@
       }
       $('#ordersTableSummary').text('Total Amount\t' + total);
       $('#tableEntriesNote').text('Showing 1 to ' + (lineItems.length || 0) + ' of ' + (lineItems.length || 0) + ' entries');
+
+      // Populate detail chips
+      try {
+        var emailVal = (orderData.orders && (orderData.orders.email || orderData.orders.customer_email)) || '—';
+        var phoneVal = (orderData.orders && (orderData.orders.phone || (orderData.orders.shipping_address && orderData.orders.shipping_address.phone) || (orderData.orders.billing_address && orderData.orders.billing_address.phone))) || '—';
+        $('#detailEmail').text(emailVal || '—');
+        $('#detailPhone').text(phoneVal || '—');
+      } catch(e) {
+        $('#detailEmail').text('—');
+        $('#detailPhone').text('—');
+      }
 
       // Removed auto-scroll to avoid unexpected page jumps after rendering
     }
@@ -1203,6 +1236,10 @@
         <div style="width:100%; margin-top:6px; color:#0f172a; font-size:13px">
           <div id="statusLine" style="margin-bottom:2px">&nbsp;</div>
           <div id="carrierLine" style="color:#6b7280">&nbsp;</div>
+        </div>
+        <div class="details-row">
+          <div class="detail-chip"><span class="key">Email:</span><span id="detailEmail">—</span></div>
+          <div class="detail-chip"><span class="key">Contact no:</span><span id="detailPhone">—</span></div>
         </div>
         <div id="statusWarning" class="alert alert-warning" style="display:none"></div>
       </div>
