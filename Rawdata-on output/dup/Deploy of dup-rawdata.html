@@ -384,15 +384,19 @@
   .carrier-link:hover { background:#0657c8 }
   .carrier-link .emoji { font-size:16px; line-height:1 }
   /* order id line in top card */
-  .order-id-line { font-size:16px; font-weight:800; color:#111827; margin:0 0 4px 0 }
+  .order-id-line { font-size:16px; font-weight:800; color:#111827; margin:0 }
   .order-id-line #trackOrderCode { font-weight:900 }
+  /* order id and carrier header row */
+  .id-and-carrier { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:8px; flex-wrap:wrap }
+  .carrier-header { display:flex; flex-direction:column; align-items:flex-end; gap:6px }
+  .carrier-header h5 { margin:0; font-size:14px; color:#0f172a; text-align:right }
   /* shipping details card layout */
-  .info-card { background:#fff; border:1px solid #e6e9ee; border-radius:10px; padding:12px }
-  .info-card .card-title { margin:0 0 10px 0; font-size:16px; color:#0f172a }
-  .info-grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; align-items:stretch; grid-auto-rows: 1fr }
-  .info-section { background:#f9fafb; border:1px solid #e6e9ee; border-radius:10px; padding:12px; display:flex; flex-direction:column; height:100% }
-  .info-section h5 { margin:0 0 6px 0; font-size:14px; color:#0f172a }
-  .col-span-2 { grid-column: 1 / -1 }
+  .info-card { background:#fff; border:1px solid #e6e9ee; border-radius:10px; padding:10px 12px }
+  .info-card .card-title { margin:0 0 8px 0; font-size:16px; color:#0f172a }
+  .info-grid { display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:start }
+  .info-field { display:flex; flex-direction:column; gap:4px }
+  .info-field h5 { margin:0; font-size:13px; color:#475569; font-weight:600 }
+  .info-field .address-line { font-size:13px; color:#334155; line-height:1.4 }
   /* inline address next to carrier link */
   .link-and-address { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-top:8px; flex-wrap:wrap }
   .right-stack { display:flex; flex-direction:row; gap:12px; align-items:stretch; min-width:260px; flex-wrap:wrap }
@@ -444,9 +448,6 @@
     .table-toolbar { flex-direction: column; align-items: stretch; gap: 6px; }
     .table-toolbar .left { justify-content: flex-start; }
     .orders-table thead th, .orders-table tbody td { padding: 8px 8px; }
-    /* Hide low-priority payout column on small screens */
-    .orders-table thead th:nth-child(8),
-    .orders-table tbody td:nth-child(8) { display: none; }
     /* Make cancel button easier to tap */
     #cancelTracking { width: 100%; }
     .tracking-form-card input.input { padding: 12px 12px; font-size: 16px; }
@@ -457,9 +458,6 @@
     .order-marker .marker-label { font-size: 11px; max-width: 76px; margin-top: 30px; }
     .result-summary .summary-key { font-size: 12px; }
     .result-summary .summary-val { font-size: 14px; }
-    /* On very small screens also hide Order Status column */
-    .orders-table thead th:nth-child(7),
-    .orders-table tbody td:nth-child(7) { display: none; }
   }
 </style>
 
@@ -1145,24 +1143,16 @@
         $tr.append('<td>' + (li.name || 'Item') + '</td>');
         $tr.append('<td>' + qty + '</td>');
         $tr.append('<td>' + rowTotal + '</td>');
-        // Delivery status badge
-        var delLbl = stepLabelForIndex(activeStep);
-        var delBadge = '<span class="badge-pill badge-gray">' + (delLbl === 'Delivered' ? 'Delivered' : (delLbl || 'Pending')) + '</span>';
-        $tr.append('<td>' + delBadge + '</td>');
         // Order status badge
         var ordStatus = (orderData.orders && (orderData.orders.financial_status || orderData.orders.fulfillment_status)) || 'Done';
         var ordBadge = '<span class="badge-pill badge-indigo">' + (ordStatus ? String(ordStatus).charAt(0).toUpperCase() + String(ordStatus).slice(1) : 'Done') + '</span>';
         $tr.append('<td>' + ordBadge + '</td>');
-        // Payout badge
-        $tr.append('<td><span class="badge-pill badge-green">Active</span></td>');
         $tbody.append($tr);
       }
       if (lineItems.length === 0) {
-        var $trEmpty = $('<tr><td colspan="8" style="color:#6b7280">No items</td></tr>');
+        var $trEmpty = $('<tr><td colspan="6" style="color:#6b7280">No items</td></tr>');
         $tbody.append($trEmpty);
       }
-      $('#ordersTableSummary').text('Total Amount\t' + total);
-      $('#tableEntriesNote').text('Showing 1 to ' + (lineItems.length || 0) + ' of ' + (lineItems.length || 0) + ' entries');
 
       // Populate contact details in the right panel
       try {
@@ -1308,26 +1298,28 @@
           <!-- Progress bar is rendered above page-wide and reused here -->
         </div>
         <div style="width:100%; margin-top:6px; color:#0f172a; font-size:13px">
-          <div class="order-id-line">Order ID: <span id="trackOrderCode">—</span></div>
+          <div class="id-and-carrier">
+            <div class="order-id-line">Order ID: <span id="trackOrderCode">—</span></div>
+            <div class="carrier-header">
+              <h5>Carrier</h5>
+              <div id="statusLine" style="margin-bottom:6px">&nbsp;</div>
+              <div id="carrierLine" style="color:#6b7280">&nbsp;</div>
+            </div>
+          </div>
           <div class="info-card">
             <h4 class="card-title">Shipping details</h4>
             <div class="info-grid">
-              <section class="info-section">
+              <div class="info-field">
                 <h5>Shipping address</h5>
                 <div id="shipAddressInline">
                   <div class="address-line">—</div>
                 </div>
-              </section>
-              <section class="info-section">
+              </div>
+              <div class="info-field">
                 <h5>Contact</h5>
                 <div class="address-line"><strong>Email:</strong> <span id="contactEmail">—</span></div>
                 <div class="address-line"><strong>Contact no:</strong> <span id="contactPhone">—</span></div>
-              </section>
-              <section class="info-section col-span-2">
-                <h5>Carrier</h5>
-                <div id="statusLine" style="margin-bottom:6px">&nbsp;</div>
-                <div id="carrierLine" style="color:#6b7280">&nbsp;</div>
-              </section>
+              </div>
             </div>
           </div>
         </div>
@@ -1355,28 +1347,13 @@
                 <th style="width:60px">#</th>
                 <th>Order ID</th>
                 <th>Product Name</th>
-                <th style="width:60px">Qty</th>
-                <th style="width:100px">Price</th>
-                <th style="width:140px">Delivery Status</th>
-                <th style="width:120px">Order Status</th>
-                <th style="width:100px">Payout</th>
+                <th style="width:80px">Qty</th>
+                <th style="width:120px">Price</th>
+                <th style="width:140px">Order Status</th>
               </tr>
             </thead>
             <tbody id="ordersTableBody"></tbody>
-            <tfoot>
-              <tr>
-                <td colspan="8" id="ordersTableSummary">&nbsp;</td>
-              </tr>
-            </tfoot>
           </table>
-        </div>
-        <div class="table-footer">
-          <div id="tableEntriesNote">&nbsp;</div>
-          <div class="pager">
-            <button type="button" id="prevPage">Previous</button>
-            <button type="button" class="current">1</button>
-            <button type="button" id="nextPage">Next</button>
-          </div>
         </div>
       </div>
     </div>
