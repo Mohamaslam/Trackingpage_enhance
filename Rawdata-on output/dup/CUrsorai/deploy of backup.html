@@ -1,4 +1,4 @@
-<style>
+  <style>
   /* Page background and shell to match sample image */
   body { background: #e9f0f7; }
   .page-shell { max-width: 1000px; margin: 28px auto; padding: 28px; box-sizing: border-box }
@@ -138,7 +138,7 @@
     /* pull markers down so they overlap the track and appear merged */
     margin-top: -8px; /* slightly lifted, leaving more room for labels */
   }
-
+  /* marker pill + label (merged duplicate rules) */
   .order-marker {
     font-size: 12px;
     color: #374151;
@@ -146,10 +146,6 @@
     flex: 1 1 0;
     padding: 0 6px;
     white-space: nowrap;
-  }
-
-  /* visible dot above the track for each marker */
-  .order-marker {
     position: relative;
     padding-top: 12px; /* keep dot centered on the track */
   }
@@ -224,64 +220,9 @@
     margin: 0 0 6px 0;
   }
 
-  /* moving emoji that shows progress */
-  .track-emoji {
-    position: absolute;
-    top: -10px; /* sit slightly above the track */
-    left: 0%;
-    transform: translateX(-50%) scale(1);
-    /* use same duration for left and transform to keep movements in sync */
-    transition: left 2200ms cubic-bezier(.2,.8,.2,1), transform 2200ms cubic-bezier(.2,.8,.2,1);
-    font-size: 22px;
-    pointer-events: none;
-    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.12));
-    z-index: 9999;
-  }
+  /* emoji-related visual rules removed (page does not render moving emoji) */
 
-  /* truck always faces right */
-  .track-emoji.truck { 
-    transform-origin: center center;
-    /* always face right: align the truck's right edge to the track position
-       and force a neutral rotation so platform emoji variants appear consistent */
-    transform: translateX(-100%) scale(1) scaleX(1) rotate(0deg);
-    transition: left 2200ms cubic-bezier(.2,.8,.2,1), transform 2200ms cubic-bezier(.2,.8,.2,1);
-  }
-  /* when at delivered state, just scale up slightly */
-  .track-emoji.truck.rotate { 
-    transform: translateX(-100%) scale(1.15) scaleX(1) rotate(0deg); 
-  }
-
-  .step-label {
-    font-size: 12px;
-    color: #374151;
-  }
-
-  .step-completed .step-indicator {
-    background: #10b981; /* green */
-  }
-
-  .step-current .step-indicator {
-    background: #3b82f6; /* blue */
-  }
-
-  .step-completed .step-line,
-  .step-current .step-line {
-    background: transparent;
-  }
-
-  /* indicator animation */
-  .step-indicator {
-    transition: transform 900ms ease, background 900ms ease, box-shadow 900ms ease;
-  }
-
-  .step-completed .step-indicator {
-    transform: scale(1.05);
-  }
-
-  .step-current .step-indicator {
-    transform: scale(1.25);
-    box-shadow: 0 0 0 6px rgba(59,130,246,0.08);
-  }
+  /* step-* styles removed: UI uses .order-marker/.marker-label/.order-track families only */
 
   /* Form card and controls styling */
 
@@ -327,9 +268,7 @@
   .tracking-form-card input.input { width:100%; padding:8px 10px; border:1px solid #e6e9ee; border-radius:6px }
 
   /* Compact layout for narrow containers */
-  @media (max-width: 420px) {
-    .step-label { display: none; }
-  }
+  /* .step-label removed; marker labels handled via .order-marker .marker-label */
 
   /* Result card layout */
   .result-card {
@@ -394,9 +333,10 @@
   .info-card { background:#fff; border:1px solid #e6e9ee; border-radius:10px; padding:10px 12px }
   .info-card .card-title { margin:0 0 8px 0; font-size:16px; color:#0f172a }
   .info-grid { display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:start }
-  .info-field { display:flex; flex-direction:column; gap:4px }
-  .info-field h5 { margin:0; font-size:13px; color:#475569; font-weight:600 }
-  .info-field .address-line { font-size:13px; color:#334155; line-height:1.4 }
+  .info-field { display:flex; flex-direction:column; gap:6px; align-items:flex-start }
+  .info-field:first-child { padding-top:24px }
+  .info-field h5 { margin:0 0 8px 0; font-size:16px; color:#0f172a; font-weight:700; min-height:24px }
+  .info-field .address-line { font-size:15px; color:#334155; line-height:1.5; font-weight:500 }
   /* inline address next to carrier link */
   .link-and-address { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-top:8px; flex-wrap:wrap }
   .right-stack { display:flex; flex-direction:row; gap:12px; align-items:stretch; min-width:260px; flex-wrap:wrap }
@@ -624,20 +564,7 @@
       return String(bestRaw);
     }
 
-    // Detect if we inferred the status from tracking numbers/urls so diagnostics can show the source
-    function inferenceSource(orderData) {
-      if (!orderData) return null;
-      if (orderData.fulfillments && orderData.fulfillments.length > 0) {
-        var f = orderData.fulfillments[0];
-        if (f) {
-          if (!f.shipment_status) {
-            if (f.tracking_numbers && f.tracking_numbers.length > 0) return 'tracking_numbers';
-            if (f.tracking_urls && f.tracking_urls.length > 0) return 'tracking_urls';
-          }
-        }
-      }
-      return null;
-    }
+    // inferenceSource removed (unused)
 
     function renderOrderProgress(steps, activeIndex) {
       steps = steps || defaultSteps;
@@ -665,33 +592,57 @@
 
       // initialize and animate to activeIndex
       clearProgressAnimation();
-      // compute percent using marker center positions so the fill targets the marker itself
-      var percent = Math.round((activeIndex) / (Math.max(1, steps.length - 1)) * 100);
-      try {
-        var trackWidth = track.width();
-        if (trackWidth > 0) {
-          var tempMarkers = container.find('.order-marker');
-          if (tempMarkers && tempMarkers.length > 0) {
-            var m = tempMarkers.eq(activeIndex);
-            var markerCenter = m.offset().left + (m.outerWidth() / 2);
-            var trackLeft = track.offset().left;
-            var computedPct = Math.round(((markerCenter - trackLeft) / trackWidth) * 100);
-            if (!isNaN(computedPct) && computedPct >= 0 && computedPct <= 100) percent = computedPct;
-          }
-        }
-      } catch (e) {
-        // fallback to index-based percent
-      }
-      // set in a timeout to ensure CSS transition runs
+      // Wait for DOM to render, then adjust track to start at first marker and end at last marker
       setTimeout(function () {
-        fillEl.css('width', percent + '%');
-        // If target is the first step, mark it active immediately so 'Ordered' shows
-        if (activeIndex === 0) {
-          $('#orderProgress .order-marker').eq(0).addClass('active');
+        try {
+          var allMarkers = container.find('.order-marker');
+          if (allMarkers.length > 0) {
+            var firstMarker = allMarkers.eq(0);
+            var lastMarker = allMarkers.eq(allMarkers.length - 1);
+            var firstCenter = firstMarker.offset().left + (firstMarker.outerWidth() / 2);
+            var lastCenter = lastMarker.offset().left + (lastMarker.outerWidth() / 2);
+            var containerLeft = container.offset().left;
+            // Extend trackbar slightly before the "Ordered" point (about 20px before)
+            var trackStart = firstCenter - containerLeft - 20;
+            var trackEnd = lastCenter - containerLeft;
+            var trackWidth = trackEnd - trackStart;
+            // Adjust track position and width to align with markers
+            track.css({
+              'margin-left': trackStart + 'px',
+              'width': trackWidth + 'px'
+            });
+            // Calculate percent based on constrained track (accounting for the extended start)
+            var activeMarker = allMarkers.eq(activeIndex);
+            var activeCenter = activeMarker.offset().left + (activeMarker.outerWidth() / 2);
+            var trackStartAbsolute = containerLeft + trackStart;
+            var percent = Math.round(((activeCenter - trackStartAbsolute) / trackWidth) * 100);
+            percent = Math.max(0, Math.min(100, percent));
+            fillEl.css('width', percent + '%');
+            // If target is the first step, mark it active immediately so 'Ordered' shows
+            if (activeIndex === 0) {
+              allMarkers.eq(0).addClass('active');
+            }
+            // monitor fill and activate markers exactly when the fill passes each marker
+            monitorFillAndActivateMarkers(fillEl, track, activeIndex, 4500);
+          } else {
+            // fallback to index-based percent
+            var percent = Math.round((activeIndex) / (Math.max(1, steps.length - 1)) * 100);
+            fillEl.css('width', percent + '%');
+            if (activeIndex === 0) {
+              $('#orderProgress .order-marker').eq(0).addClass('active');
+            }
+            monitorFillAndActivateMarkers(fillEl, track, activeIndex, 4500);
+          }
+        } catch (e) {
+          // fallback to index-based percent
+          var percent = Math.round((activeIndex) / (Math.max(1, steps.length - 1)) * 100);
+          fillEl.css('width', percent + '%');
+          if (activeIndex === 0) {
+            $('#orderProgress .order-marker').eq(0).addClass('active');
+          }
+          monitorFillAndActivateMarkers(fillEl, track, activeIndex, 4500);
         }
-        // monitor fill and activate markers exactly when the fill passes each marker
-        monitorFillAndActivateMarkers(fillEl, track, activeIndex, 4500);
-      }, 10);
+      }, 50);
     }
 
     // helper to get label for a step index
@@ -708,7 +659,6 @@
       _progressTimeouts = [];
       // reset single-track elements
       $('#orderProgress .order-track-fill').css('width', '0%');
-      $('#orderProgress .track-emoji').css('left', '0%').css('transform', 'translateX(-50%) scale(1)');
       // remove legacy classes if present
       $('#orderProgress .order-step').removeClass('step-completed step-current');
     }
@@ -897,30 +847,7 @@
       return null;
     }
 
-    function animateOrderProgress(targetIndex) {
-      // single-track animation: move fill and single emoji to the target percent
-      var track = $('#orderProgress .order-track');
-      var fill = track.find('.order-track-fill');
-      var emoji = track.find('.track-emoji');
-      var markers = $('#orderProgress .order-marker');
-      var stepsCount = Math.max(1, markers.length - 1);
-      var percent = Math.round((targetIndex) / stepsCount * 100);
-      // set ARIA for assistive tech
-      track.attr('aria-valuenow', percent);
-      // animate fill
-      fill.css('width', percent + '%');
-      // activate markers in sync with actual fill movement
-      monitorFillAndActivateMarkers(fill, track, targetIndex, 4500);
-      // slightly normalize scale after transition (maintain rotation state)
-      setTimeout(function () {
-        if (emoji.hasClass('truck')) {
-          // keep facing right, normalize scale (right-edge alignment preserved)
-          emoji.css('transform', 'translateX(-100%) scale(1.15) scaleX(1) rotate(0deg)');
-        } else {
-          emoji.css('transform', 'translateX(-50%) scale(1.15)');
-        }
-      }, 6500); // match slower CSS transition time
-    }
+    // animateOrderProgress removed (renderOrderProgress + monitorFillAndActivateMarkers handle animation)
 
     // Build progress DOM without animating (used before server response)
     function buildProgressDom(steps) {
@@ -945,7 +872,6 @@
       clearProgressAnimation();
       var track = $('#orderProgress .order-track');
       var fill = track.find('.order-track-fill');
-      var emoji = track.find('.track-emoji');
       var markers = $('#orderProgress .order-marker');
       var idx = 0;
       // sweep the emoji across markers
@@ -956,32 +882,11 @@
         // trigger in timeout so transition animates
         setTimeout(function () {
           fill.css('width', percent + '%');
-          emoji.css('left', percent + '%');
-          // handle truck direction during sweep (always face right)
-          if (emoji.hasClass('truck')) {
-            if (idx >= (markers.length - 1)) {
-              emoji.addClass('rotate');
-              emoji.css('transform', 'translateX(-100%) scale(1.25) scaleX(1) rotate(0deg)');
-            } else {
-              emoji.removeClass('rotate');
-              emoji.css('transform', 'translateX(-100%) scale(1.25) scaleX(1) rotate(0deg)');
-            }
-          } else {
-            emoji.css('transform', 'translateX(-50%) scale(1.25)');
-          }
           // mark current marker active
           $('#orderProgress .order-marker').each(function(i, el){
             if (i <= idx) $(el).addClass('active'); else $(el).removeClass('active');
           });
         }, 20);
-        setTimeout(function () {
-          if (emoji.hasClass('truck')) {
-            // normalize back to neutral scale while preserving right-edge alignment
-            emoji.css('transform', 'translateX(-100%) scale(1) scaleX(1) rotate(0deg)');
-          } else {
-            emoji.css('transform', 'translateX(-50%) scale(1)');
-          }
-        }, 6500); // match slower CSS transition time
         idx = (idx + 1) % markers.length;
       }, 7000); // interval larger than transition for smooth pacing
     }
@@ -997,10 +902,8 @@
 
       // Determine shipment status to drive progress bar using a robust derivation helper
       var progressStatus = deriveProgressStatus(orderData);
-      console.debug('deriveProgressStatus ->', progressStatus);
-      var activeStep = mapShipmentStatusToStep(progressStatus);
-      console.debug('mapped activeStep ->', activeStep);
-      renderOrderProgress(null, activeStep);
+  var activeStep = mapShipmentStatusToStep(progressStatus);
+  renderOrderProgress(null, activeStep);
       // Attempt to use absolute per-step timestamps from the API when available so
       // checkmarks appear exactly when those timestamps occur. Fall back to
       // proportional/staggered activation when timestamps are not present.
@@ -1177,9 +1080,17 @@
           var cityLine = [a.city, a.province, a.zip].filter(Boolean).join(', ');
           if (cityLine) lines.push(cityLine);
           if (a.country) lines.push(a.country);
-          if (a.phone) lines.push('Phone: ' + a.phone);
         } else if (a && typeof a === 'string') {
-          lines = [String(a)];
+          // if address is a string, split by newlines and filter out phone-related lines
+          var addrStr = String(a);
+          var addrLines = addrStr.split(/\n|<br\s*\/?>/i).map(function(l){ return l.trim(); }).filter(Boolean);
+          addrLines.forEach(function(l){
+            // filter out lines that look like phone numbers
+            var lower = l.toLowerCase();
+            if (lower.indexOf('phone') === -1 && lower.indexOf('tel') === -1 && !/^[\d\s\-\+\(\)]+$/.test(l)) {
+              lines.push(l);
+            }
+          });
         }
         var $addr = $('#shipAddressInline');
         $addr.empty();
@@ -1301,7 +1212,6 @@
           <div class="id-and-carrier">
             <div class="order-id-line">Order ID: <span id="trackOrderCode">—</span></div>
             <div class="carrier-header">
-              <h5>Carrier</h5>
               <div id="statusLine" style="margin-bottom:6px">&nbsp;</div>
               <div id="carrierLine" style="color:#6b7280">&nbsp;</div>
             </div>
@@ -1310,15 +1220,14 @@
             <h4 class="card-title">Shipping details</h4>
             <div class="info-grid">
               <div class="info-field">
-                <h5>Shipping address</h5>
                 <div id="shipAddressInline">
                   <div class="address-line">—</div>
                 </div>
               </div>
               <div class="info-field">
-                <h5>Contact</h5>
+                <h5>Contact details</h5>
                 <div class="address-line"><strong>Email:</strong> <span id="contactEmail">—</span></div>
-                <div class="address-line"><strong>Contact no:</strong> <span id="contactPhone">—</span></div>
+                <div class="address-line"><strong>Phone:</strong> <span id="contactPhone">—</span></div>
               </div>
             </div>
           </div>
