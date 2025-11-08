@@ -1,4 +1,4 @@
-<style>
+  <style>
   /* Page background and shell to match sample image */
   body { background: #e9f0f7; }
   .page-shell { max-width: 1000px; margin: 28px auto; padding: 28px; box-sizing: border-box }
@@ -394,9 +394,10 @@
   .info-card { background:#fff; border:1px solid #e6e9ee; border-radius:10px; padding:10px 12px }
   .info-card .card-title { margin:0 0 8px 0; font-size:16px; color:#0f172a }
   .info-grid { display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:start }
-  .info-field { display:flex; flex-direction:column; gap:4px }
-  .info-field h5 { margin:0 0 8px 0; font-size:16px; color:#0f172a; font-weight:700 }
-  .info-field .address-line { font-size:13px; color:#334155; line-height:1.4 }
+  .info-field { display:flex; flex-direction:column; gap:6px; align-items:flex-start }
+  .info-field:first-child { padding-top:24px }
+  .info-field h5 { margin:0 0 8px 0; font-size:16px; color:#0f172a; font-weight:700; min-height:24px }
+  .info-field .address-line { font-size:15px; color:#334155; line-height:1.5; font-weight:500 }
   /* inline address next to carrier link */
   .link-and-address { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-top:8px; flex-wrap:wrap }
   .right-stack { display:flex; flex-direction:row; gap:12px; align-items:stretch; min-width:260px; flex-wrap:wrap }
@@ -665,33 +666,57 @@
 
       // initialize and animate to activeIndex
       clearProgressAnimation();
-      // compute percent using marker center positions so the fill targets the marker itself
-      var percent = Math.round((activeIndex) / (Math.max(1, steps.length - 1)) * 100);
-      try {
-        var trackWidth = track.width();
-        if (trackWidth > 0) {
-          var tempMarkers = container.find('.order-marker');
-          if (tempMarkers && tempMarkers.length > 0) {
-            var m = tempMarkers.eq(activeIndex);
-            var markerCenter = m.offset().left + (m.outerWidth() / 2);
-            var trackLeft = track.offset().left;
-            var computedPct = Math.round(((markerCenter - trackLeft) / trackWidth) * 100);
-            if (!isNaN(computedPct) && computedPct >= 0 && computedPct <= 100) percent = computedPct;
-          }
-        }
-      } catch (e) {
-        // fallback to index-based percent
-      }
-      // set in a timeout to ensure CSS transition runs
+      // Wait for DOM to render, then adjust track to start at first marker and end at last marker
       setTimeout(function () {
-        fillEl.css('width', percent + '%');
-        // If target is the first step, mark it active immediately so 'Ordered' shows
-        if (activeIndex === 0) {
-          $('#orderProgress .order-marker').eq(0).addClass('active');
+        try {
+          var allMarkers = container.find('.order-marker');
+          if (allMarkers.length > 0) {
+            var firstMarker = allMarkers.eq(0);
+            var lastMarker = allMarkers.eq(allMarkers.length - 1);
+            var firstCenter = firstMarker.offset().left + (firstMarker.outerWidth() / 2);
+            var lastCenter = lastMarker.offset().left + (lastMarker.outerWidth() / 2);
+            var containerLeft = container.offset().left;
+            // Extend trackbar slightly before the "Ordered" point (about 20px before)
+            var trackStart = firstCenter - containerLeft - 20;
+            var trackEnd = lastCenter - containerLeft;
+            var trackWidth = trackEnd - trackStart;
+            // Adjust track position and width to align with markers
+            track.css({
+              'margin-left': trackStart + 'px',
+              'width': trackWidth + 'px'
+            });
+            // Calculate percent based on constrained track (accounting for the extended start)
+            var activeMarker = allMarkers.eq(activeIndex);
+            var activeCenter = activeMarker.offset().left + (activeMarker.outerWidth() / 2);
+            var trackStartAbsolute = containerLeft + trackStart;
+            var percent = Math.round(((activeCenter - trackStartAbsolute) / trackWidth) * 100);
+            percent = Math.max(0, Math.min(100, percent));
+            fillEl.css('width', percent + '%');
+            // If target is the first step, mark it active immediately so 'Ordered' shows
+            if (activeIndex === 0) {
+              allMarkers.eq(0).addClass('active');
+            }
+            // monitor fill and activate markers exactly when the fill passes each marker
+            monitorFillAndActivateMarkers(fillEl, track, activeIndex, 4500);
+          } else {
+            // fallback to index-based percent
+            var percent = Math.round((activeIndex) / (Math.max(1, steps.length - 1)) * 100);
+            fillEl.css('width', percent + '%');
+            if (activeIndex === 0) {
+              $('#orderProgress .order-marker').eq(0).addClass('active');
+            }
+            monitorFillAndActivateMarkers(fillEl, track, activeIndex, 4500);
+          }
+        } catch (e) {
+          // fallback to index-based percent
+          var percent = Math.round((activeIndex) / (Math.max(1, steps.length - 1)) * 100);
+          fillEl.css('width', percent + '%');
+          if (activeIndex === 0) {
+            $('#orderProgress .order-marker').eq(0).addClass('active');
+          }
+          monitorFillAndActivateMarkers(fillEl, track, activeIndex, 4500);
         }
-        // monitor fill and activate markers exactly when the fill passes each marker
-        monitorFillAndActivateMarkers(fillEl, track, activeIndex, 4500);
-      }, 10);
+      }, 50);
     }
 
     // helper to get label for a step index
@@ -1309,13 +1334,12 @@
           <div class="id-and-carrier">
             <div class="order-id-line">Order ID: <span id="trackOrderCode">—</span></div>
             <div class="carrier-header">
-              <h5>Carrier</h5>
               <div id="statusLine" style="margin-bottom:6px">&nbsp;</div>
               <div id="carrierLine" style="color:#6b7280">&nbsp;</div>
             </div>
           </div>
           <div class="info-card">
-            <h4 class="card-title">Shipping address</h4>
+            <h4 class="card-title">Shipping details</h4>
             <div class="info-grid">
               <div class="info-field">
                 <div id="shipAddressInline">
