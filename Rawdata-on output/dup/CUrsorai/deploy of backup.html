@@ -1040,12 +1040,11 @@
         var price = Number(li.price || li.line_price || 0);
         var rowTotal = isNaN(qty * price) ? 0 : qty * price;
         total += rowTotal;
-        var $tr = $('<tr></tr>');
-        $tr.append('<td>' + String(i+1).padStart(2,'0') + '</td>');
-        $tr.append('<td>' + (orderData.orders.order_number || '—') + '</td>');
-        $tr.append('<td>' + (li.name || 'Item') + '</td>');
-        $tr.append('<td>' + qty + '</td>');
-        $tr.append('<td>' + rowTotal + '</td>');
+  var $tr = $('<tr></tr>');
+  $tr.append('<td>' + String(i+1).padStart(2,'0') + '</td>');
+  $tr.append('<td>' + (li.name || 'Item') + '</td>');
+  $tr.append('<td>' + qty + '</td>');
+  $tr.append('<td>' + rowTotal + '</td>');
         // Order status badge
         var ordStatus = (orderData.orders && (orderData.orders.financial_status || orderData.orders.fulfillment_status)) || 'Done';
         var ordBadge = '<span class="badge-pill badge-indigo">' + (ordStatus ? String(ordStatus).charAt(0).toUpperCase() + String(ordStatus).slice(1) : 'Done') + '</span>';
@@ -1053,7 +1052,7 @@
         $tbody.append($tr);
       }
       if (lineItems.length === 0) {
-        var $trEmpty = $('<tr><td colspan="6" style="color:#6b7280">No items</td></tr>');
+        var $trEmpty = $('<tr><td colspan="5" style="color:#6b7280">No items</td></tr>');
         $tbody.append($trEmpty);
       }
 
@@ -1254,7 +1253,6 @@
             <thead>
               <tr>
                 <th style="width:60px">#</th>
-                <th>Order ID</th>
                 <th>Product Name</th>
                 <th style="width:80px">Qty</th>
                 <th style="width:120px">Price</th>
