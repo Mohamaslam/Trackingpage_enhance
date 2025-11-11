@@ -793,7 +793,7 @@
         var ts = stepTimestamps[i];
         if (!ts) continue;
         var when = parseTimestampToMs(ts);
-        if (!when) continue;
+        if (!when) continue;4
         var delay = when - Date.now();
         if (delay <= 0) {
           // in the past: mark active immediately
