@@ -1,137 +1,127 @@
   <style>
-  /* FULL-SCREEN MOBILE SUPPORT */
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  
-  html {
-    width: 100%;
-    height: 100%;
-  }
+    /* Simplified vertical layout + vertical progress track
+       Change 1: remove 'card' visuals (no backgrounds, borders, shadows)
+       Change 2: vertical track on the left, labels to the right
+       Change 3: single-column vertical flow optimized for mobile
+    */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  body {
-    width: 100%;
-    height: 100%;
-    background: #e9f0f7;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    position: fixed;
-    top: 0;
-    left: 0;
-  }
+    html, body { width: 100%; height: 100%; }
+    body {
+      width: 100%;
+      height: 100%;
+      background: #e9f0f7;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      color: #0f172a;
+    }
 
-  /* Page background and shell to match sample image */
-  .page-shell { 
-    max-width: 1000px; 
-    width: 100%;
-    margin: 0 auto; 
-    padding: 28px; 
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-  }
+    /* Page shell: full width, stacked content */
+    .page-shell {
+      width: 100%;
+      padding: 16px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: stretch;
+    }
 
-  .content-card {
-    background: #f8fafc; /* very light gray outer card */
-    border-radius: 18px;
-    padding: 26px;
-    box-shadow: 0 18px 40px rgba(15,23,42,0.06);
-    display: flex;
-    flex-direction: column;
-  }
-  .PageHeader {
-    display: none;
-  }
+    /* Remove 'card' chrome - keep content as plain text blocks */
+    .content-card,
+    .tracking-form-card,
+    .result-card,
+    .table-card,
+    .info-card,
+    .inline-address,
+    .inline-contact {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      padding: 0 !important;
+    }
 
-  .w-100 {
-    width: 100% !important;
-  }
+    /* Make form and controls flow as simple stacked blocks */
+    .tracking-form-card { padding: 0; }
+    .tracking-form-card h3 { font-size: 18px; margin-bottom: 6px; }
+    .tracking-form-card .lead { margin-bottom: 8px; color: #475569; }
+    .tracking-form-card .field { margin-bottom: 10px; }
+    .tracking-form-card .label { font-weight: 700; display:block; margin-bottom:6px; }
+    .tracking-form-card input.input { width: 100%; padding: 10px; border: 1px solid #e6e9ee; border-radius: 6px; }
 
-  .cap {
-    text-transform: capitalize;
-    color: rgb(var(--color-foreground) / 1);
-  }
+    .btn-primary-custom { display: inline-block; padding: 10px 14px; border-radius: 8px; background: linear-gradient(180deg,#0b63e6,#0657c8); color: #fff; font-weight:700; border: none; }
+    .btn-secondary-custom { display:inline-block; padding: 8px 12px; border-radius: 6px; background: transparent; border: 1px solid transparent; }
 
-  .nr {
-    color: rgb(var(--color-foreground) / 1);
-  }
+    /* Vertical progress area: left track, right labels */
+    .order-progress { display:flex; gap:12px; align-items:flex-start; padding: 8px 0; }
 
-  #renderResponse p {
-    color: rgb(var(--color-foreground) / .6);
-  }
+    .order-track {
+      position: relative;
+      width: 6px;
+      min-height: 220px; /* base height for track - will expand with content */
+      background: rgba(229,231,235,0.9);
+      border-radius: 6px;
+      flex: 0 0 6px;
+      align-self: stretch;
+    }
 
-  #renderResponse .Segment__Title { 
-    margin-bottom: 14px;
-  }
+    .order-track-fill {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 0%;
+      background: linear-gradient(180deg,#10b981,#16a34a);
+      border-radius: 6px;
+      transition: height 1200ms cubic-bezier(.2,.8,.2,1);
+      z-index: 2;
+    }
 
-  #renderResponse .Segment {
-    margin-top: 25px;
-    border-bottom: 1px solid rgb(var(--color-border));
-    padding-bottom: 25px;
-  }
+    .order-markers { display:flex; flex-direction:column; justify-content:space-between; gap:8px; flex:1; }
 
-  #renderResponse .Segment:last-child {
-    border-bottom: none;
-  }
+    .order-marker { display:flex; align-items:center; gap:12px; padding:6px 0; }
 
-  #renderResponse .Segment+.Segment {
-    margin-top: 25px;
-  }
+    .order-marker .dot {
+      width: 28px; height: 28px; border-radius: 50%; background: #e6e9ee; display:flex; align-items:center; justify-content:center; color: #fff; flex:0 0 28px; box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
 
-  #renderResponse .mb-0 {
-    margin-top: 0;
-    margin-bottom: 0;
-  }
+    .order-marker.active .dot { background: #10b981; box-shadow: 0 6px 18px rgba(16,185,129,0.14); }
 
-  #renderResponse .mb-4 {
-    margin-bottom: 20px;
-  }
+    .marker-label { font-size: 15px; font-weight:700; color:#111827; line-height:1.2; }
 
-  .ta-center {
-    text-align: center;
-  }
+    /* Result/summary/text blocks become simple stacked sections */
+    .result-summary { padding: 8px 0; margin-top: 6px; }
+    .result-summary h4 { font-size: 16px; margin-bottom: 6px; }
 
-  #renderResponse .mt-4 {
-    margin-top: 20px;
-  }
+    /* Table becomes simple full-width list on mobile */
+    .orders-table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+    .orders-table thead { display:none; }
+    .orders-table tbody tr { display:block; border-bottom:1px dashed rgba(15,23,42,0.04); padding:10px 0; }
+    .orders-table tbody td { display:flex; justify-content:space-between; padding:6px 0; }
 
-  #renderResponse .button--close {
-    height: var(--sp-12);
-    width: var(--sp-12);
-    flex: 0 0 auto;
-    margin-inline-start: auto;
-  }
+    /* Contact and address as plain lines */
+    .address-line { font-size:14px; color:#334155; margin:4px 0; }
 
-  p.orderConfirmation {
-    color: var(--text-color) !important;
-    line-height: 1.65;
-    margin-bottom: 20px;
-    border: 1px solid rgb(var(--color-foreground));
-    padding: 6px;
-  }
+    /* Responsive: ensure everything stacks and uses full viewport height on mobile */
+    @media (max-width: 680px) {
+      .page-shell { padding: 12px; }
+      .order-track { min-height: 320px; }
+      .marker-label { font-size: 14px; }
+      .orders-table tbody tr { padding: 8px 0; }
+    }
 
-  /* Status badge styles */
-  .status-badge {
-    display: inline-block;
-    padding: 3px 8px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 600;
-    line-height: 1;
-    color: #fff;
-    vertical-align: middle;
-  }
-
-  .status--processing { background: #f59e0b; } /* amber */
-  .status--pending    { background: #6b7280; } /* gray */
-  .status--shipped    { background: #3b82f6; } /* blue */
-  .status--delivered  { background: #10b981; } /* green */
+    @media (max-width: 420px) {
+      .page-shell { padding: 10px; }
+      .order-track { min-height: 420px; }
+      .marker-label { font-size: 13px; }
+      .btn-primary-custom { width: 100%; }
+    }
   .status--cancelled  { background: #ef4444; } /* red */
   .status--in_transit  { background: #6366f1; } /* indigo */
   .status--default    { background: #374151; }
@@ -854,14 +844,14 @@
       try { $('#currentStepLabel').text(stepLabelForIndex(activeIndex)); } catch(e) {}
       // single continuous track
       var track = $('<div class="order-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>');
-  var fillEl = $('<div class="order-track-fill"><span class="flow"></span></div>');
+  var fillEl = $('<div class="order-track-fill"></div>');
       // No emoji: we intentionally do not render the moving truck/emoji anymore.
       track.append(fillEl);
 
       var markers = $('<div class="order-markers" aria-hidden="true"></div>');
       for (var i = 0; i < steps.length; i++) {
-        // wrap the step text in a marker-label so it can be styled/separated from the pill
-        markers.append('<div class="order-marker"><span class="marker-label">' + steps[i] + '</span></div>');
+        // vertical marker: dot on the left, label on right
+        markers.append('<div class="order-marker"><div class="dot"></div><div class="marker-label">' + steps[i] + '</div></div>');
       }
 
       container.append(track);
@@ -870,55 +860,22 @@
 
       // initialize and animate to activeIndex
       clearProgressAnimation();
-      // Wait for DOM to render, then adjust track to start at first marker and end at last marker
+      // Wait for DOM to render, then animate vertical fill based on index
       setTimeout(function () {
         try {
           var allMarkers = container.find('.order-marker');
-          if (allMarkers.length > 0) {
-            var firstMarker = allMarkers.eq(0);
-            var lastMarker = allMarkers.eq(allMarkers.length - 1);
-            var firstCenter = firstMarker.offset().left + (firstMarker.outerWidth() / 2);
-            var lastCenter = lastMarker.offset().left + (lastMarker.outerWidth() / 2);
-            var containerLeft = container.offset().left;
-            // Extend trackbar slightly before the "Ordered" point (about 20px before)
-            var trackStart = firstCenter - containerLeft - 20;
-            var trackEnd = lastCenter - containerLeft;
-            var trackWidth = trackEnd - trackStart;
-            // Adjust track position and width to align with markers
-            track.css({
-              'margin-left': trackStart + 'px',
-              'width': trackWidth + 'px'
-            });
-            // Calculate percent based on constrained track (accounting for the extended start)
-            var activeMarker = allMarkers.eq(activeIndex);
-            var activeCenter = activeMarker.offset().left + (activeMarker.outerWidth() / 2);
-            var trackStartAbsolute = containerLeft + trackStart;
-            var percent = Math.round(((activeCenter - trackStartAbsolute) / trackWidth) * 100);
-            percent = Math.max(0, Math.min(100, percent));
-            fillEl.css('width', percent + '%');
-            // If target is the first step, mark it active immediately so 'Ordered' shows
-            if (activeIndex === 0) {
-              allMarkers.eq(0).addClass('active');
-            }
-            // monitor fill and activate markers exactly when the fill passes each marker
-            monitorFillAndActivateMarkers(fillEl, track, activeIndex, 4500);
-          } else {
-            // fallback to index-based percent
-            var percent = Math.round((activeIndex) / (Math.max(1, steps.length - 1)) * 100);
-            fillEl.css('width', percent + '%');
-            if (activeIndex === 0) {
-              $('#orderProgress .order-marker').eq(0).addClass('active');
-            }
-            monitorFillAndActivateMarkers(fillEl, track, activeIndex, 4500);
-          }
+          var stepsCount = Math.max(1, allMarkers.length - 1);
+          var percent = Math.round((activeIndex) / stepsCount * 100);
+          percent = Math.max(0, Math.min(100, percent));
+          fillEl.css('height', percent + '%');
+          // If target is the first step, mark it active immediately so 'Ordered' shows
+          if (activeIndex === 0) allMarkers.eq(0).addClass('active');
+          monitorFillAndActivateMarkers(fillEl, track, activeIndex, 1200);
         } catch (e) {
-          // fallback to index-based percent
           var percent = Math.round((activeIndex) / (Math.max(1, steps.length - 1)) * 100);
-          fillEl.css('width', percent + '%');
-          if (activeIndex === 0) {
-            $('#orderProgress .order-marker').eq(0).addClass('active');
-          }
-          monitorFillAndActivateMarkers(fillEl, track, activeIndex, 4500);
+          fillEl.css('height', percent + '%');
+          if (activeIndex === 0) $('#orderProgress .order-marker').eq(0).addClass('active');
+          monitorFillAndActivateMarkers(fillEl, track, activeIndex, 1200);
         }
       }, 50);
     }
@@ -936,7 +893,7 @@
       _progressTimeouts.forEach(function (t) { clearTimeout(t); });
       _progressTimeouts = [];
       // reset single-track elements
-      $('#orderProgress .order-track-fill').css('width', '0%');
+      $('#orderProgress .order-track-fill').css('height', '0%');
       // remove legacy classes if present
       $('#orderProgress .order-step').removeClass('step-completed step-current');
     }
@@ -977,56 +934,47 @@
       return null;
     }
 
-    // Monitor the fill element during its CSS transition and activate markers the moment
-    // the fill crosses each marker's position. This keeps checkmarks strictly in-sync
-    // with the visual fill regardless of timing differences.
+    // Monitor the vertical fill and activate markers when the fill height reaches their index-defined percent
     function monitorFillAndActivateMarkers(fillEl, trackEl, targetIndex, fallbackDurationMs) {
       // cancel any pending timeouts/raf
       _progressTimeouts.forEach(function (t) { clearTimeout(t); });
       _progressTimeouts = [];
       if (_fillMonitorRAF) { cancelAnimationFrame(_fillMonitorRAF); _fillMonitorRAF = null; }
 
-  var markers = $('#orderProgress .order-marker');
-  if (!fillEl || !trackEl || markers.length === 0) return;
+      var markers = $('#orderProgress .order-marker');
+      if (!fillEl || !trackEl || markers.length === 0) return;
 
-      // compute marker positions as percentages of track width
-      var trackWidth = trackEl.width();
+      // compute marker percentages by index (0..100)
       var markerPercents = [];
-      markers.each(function(i, el){
-        var $el = $(el);
-        // find center X relative to track using page offsets
-        var markerCenter = $el.offset().left + ($el.outerWidth() / 2);
-        var trackLeft = trackEl.offset().left;
-        var markerOffset = markerCenter - trackLeft;
-        var pct = (markerOffset / trackWidth) * 100;
+      var n = markers.length;
+      for (var i = 0; i < n; i++) {
+        var pct = Math.round((i) / Math.max(1, n - 1) * 100);
         markerPercents.push(pct);
-      });
+      }
 
-      // target percent (fill will animate from current to this percent)
-      var stepsCount = Math.max(1, markers.length - 1);
-      var targetPercent = Math.round((targetIndex) / stepsCount * 100);
+      // target percent (fill will animate to this percent)
+      var targetPercent = markerPercents[Math.max(0, Math.min(markers.length - 1, targetIndex))];
 
       // determine duration from computed style if possible
       var cssDur = null;
       try { cssDur = parseCssTimeToMs(window.getComputedStyle(fillEl[0]).transitionDuration); } catch (e) { cssDur = null; }
-      var durationMs = cssDur || fallbackDurationMs || 4500;
+      var durationMs = cssDur || fallbackDurationMs || 1200;
 
-  var activated = new Array(markers.length).fill(false);
-  // preserve any already-active markers (e.g., timestamp-driven or pre-activated)
-  markers.each(function(i, el){ if ($(el).hasClass('active')) activated[i] = true; });
+      var activated = new Array(markers.length).fill(false);
+      markers.each(function(i, el){ if ($(el).hasClass('active')) activated[i] = true; });
 
       function step() {
-        // current fill percent by reading fillEl width
-        var currentFillPx = fillEl.width();
-        var currentPct = (currentFillPx / trackWidth) * 100;
-        // activate any marker whose percent <= currentPct and index <= targetIndex
+        // current fill percent by reading fillEl height vs track height
+        var trackHeight = trackEl.height();
+        var currentFillPx = fillEl.height();
+        var currentPct = trackHeight > 0 ? (currentFillPx / trackHeight) * 100 : 0;
         for (var i = 0; i <= targetIndex && i < markerPercents.length; i++) {
-          if (!activated[i] && markerPercents[i] <= currentPct + 0.5) { // small tolerance
+          if (!activated[i] && markerPercents[i] <= currentPct + 0.5) {
             $('#orderProgress .order-marker').eq(i).addClass('active');
             activated[i] = true;
           }
         }
-        // continue until we've reached targetPercent (or all up to target activated)
+        // continue until we've activated all up to targetIndex
         var allDone = true;
         for (var j = 0; j <= targetIndex; j++) if (!activated[j]) { allDone = false; break; }
         if (!allDone) {
@@ -1036,7 +984,6 @@
         }
       }
 
-      // start monitoring
       _fillMonitorRAF = requestAnimationFrame(step);
     }
 
@@ -1071,7 +1018,7 @@
         var ts = stepTimestamps[i];
         if (!ts) continue;
         var when = parseTimestampToMs(ts);
-        if (!when) continue;4
+  if (!when) continue;
         var delay = when - Date.now();
         if (delay <= 0) {
           // in the past: mark active immediately
@@ -1129,16 +1076,16 @@
 
     // Build progress DOM without animating (used before server response)
     function buildProgressDom(steps) {
-      // Build simplified single-track skeleton used for indeterminate animation
+      // Build simplified vertical-track skeleton used for indeterminate animation
       steps = steps || defaultSteps;
       var container = $('#orderProgress');
       container.empty();
-    try { $('#currentStepLabel').text('Fetching status…'); } catch(e) {}
-    var track = $('<div class="order-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>');
-  var fill = $('<div class="order-track-fill"><span class="flow"></span></div>');
-    track.append(fill);
+      try { $('#currentStepLabel').text('Fetching status…'); } catch(e) {}
+      var track = $('<div class="order-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>');
+      var fill = $('<div class="order-track-fill"></div>');
+      track.append(fill);
       var markers = $('<div class="order-markers" aria-hidden="true"></div>');
-  for (var i = 0; i < steps.length; i++) markers.append('<div class="order-marker"><span class="marker-label">' + steps[i] + '</span></div>');
+      for (var i = 0; i < steps.length; i++) markers.append('<div class="order-marker"><div class="dot"></div><div class="marker-label">' + steps[i] + '</div></div>');
       container.append(track);
       container.append(markers);
       $('#orderProgressContainer').show();
@@ -1155,18 +1102,18 @@
       // sweep the emoji across markers
       // interval longer than transition so each sweep completes before next step
       _progressInterval = setInterval(function () {
-        var stepsCount = Math.max(1, markers.length - 1);
-        var percent = Math.round((idx) / stepsCount * 100);
-        // trigger in timeout so transition animates
-        setTimeout(function () {
-          fill.css('width', percent + '%');
-          // mark current marker active
-          $('#orderProgress .order-marker').each(function(i, el){
-            if (i <= idx) $(el).addClass('active'); else $(el).removeClass('active');
-          });
-        }, 20);
-        idx = (idx + 1) % markers.length;
-      }, 7000); // interval larger than transition for smooth pacing
+          var stepsCount = Math.max(1, markers.length - 1);
+          var percent = Math.round((idx) / stepsCount * 100);
+          // trigger in timeout so transition animates
+          setTimeout(function () {
+            fill.css('height', percent + '%');
+            // mark current marker active
+            $('#orderProgress .order-marker').each(function(i, el){
+              if (i <= idx) $(el).addClass('active'); else $(el).removeClass('active');
+            });
+          }, 20);
+          idx = (idx + 1) % markers.length;
+        }, 3000); // slightly faster for vertical sweep
     }
 
     function stopIndeterminateProgress() {
