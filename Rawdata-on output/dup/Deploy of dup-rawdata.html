@@ -1230,6 +1230,7 @@
     function displayOrderDetails(orderData) {
       $("#errorDiv").hide();
       $("#orderDetails").show();
+      var order = (orderData && typeof orderData === 'object' && orderData.orders && typeof orderData.orders === 'object') ? orderData.orders : {};
 
       // Determine shipment status to drive progress bar using a robust derivation helper
       var progressStatus = deriveProgressStatus(orderData);
@@ -1263,18 +1264,18 @@
     // diagnostics removed from UI per request (no raw/derived data displayed)
 
   // Populate the compact summary panel
-  $("#summaryOrderNumber").text(orderData.orders.order_number || '—');
+  $("#summaryOrderNumber").text(order.order_number || '—');
   // also show the order code in the track header
-  $("#trackOrderCode").text(orderData.orders.order_number || '—');
-      $("#summaryStatus").html(statusBadge(orderData.orders.fulfillment_status || deriveProgressStatus(orderData) || 'Unknown'));
-      $("#summaryCustomer").text(orderData.orders.email || orderData.orders.phone || '—');
-      $("#summaryAddress").html(orderData.orders.shipping_address || '—');
+  $("#trackOrderCode").text(order.order_number || '—');
+      $("#summaryStatus").html(statusBadge(order.fulfillment_status || deriveProgressStatus(orderData) || 'Unknown'));
+      $("#summaryCustomer").text(order.email || order.phone || '—');
+      $("#summaryAddress").html(order.shipping_address || '—');
 
       // Build compact items list showing only product name and SKU for quick scanning
       var itemsList = $("#summaryItems");
       itemsList.empty();
-      if (orderData.orders.line_items && orderData.orders.line_items.length > 0) {
-        orderData.orders.line_items.forEach(function (it) {
+      if (order.line_items && order.line_items.length > 0) {
+        order.line_items.forEach(function (it) {
           var name = it.name || 'Item';
           var sku = it.sku || '';
           var li = $('<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px"></div>');
@@ -1350,7 +1351,7 @@
       // Build the table rows for All Orders section (single order view)
       var $tbody = $('#ordersTableBody');
       $tbody.empty();
-      var lineItems = (orderData.orders && orderData.orders.line_items) ? orderData.orders.line_items : [];
+      var lineItems = Array.isArray(order.line_items) ? order.line_items : [];
       var total = 0;
       // Reflect item count in the "Show entries" select
       try {
@@ -1377,7 +1378,7 @@
   $tr.append('<td>' + qty + '</td>');
   $tr.append('<td>' + rowTotal + '</td>');
         // Order status badge
-        var ordStatus = (orderData.orders && (orderData.orders.financial_status || orderData.orders.fulfillment_status)) || 'Done';
+        var ordStatus = (order.financial_status || order.fulfillment_status) || 'Done';
         var ordBadge = '<span class="badge-pill badge-indigo">' + (ordStatus ? String(ordStatus).charAt(0).toUpperCase() + String(ordStatus).slice(1) : 'Done') + '</span>';
         $tr.append('<td>' + ordBadge + '</td>');
         $tbody.append($tr);
@@ -1391,8 +1392,8 @@
 
       // Populate contact details in the right panel
       try {
-        var emailVal = (orderData.orders && (orderData.orders.email || orderData.orders.customer_email)) || '—';
-        var phoneVal = (orderData.orders && (orderData.orders.phone || (orderData.orders.shipping_address && orderData.orders.shipping_address.phone) || (orderData.orders.billing_address && orderData.orders.billing_address.phone))) || '—';
+        var emailVal = (order.email || order.customer_email) || '—';
+        var phoneVal = (order.phone || (order.shipping_address && order.shipping_address.phone) || (order.billing_address && order.billing_address.phone)) || '—';
         $('#contactEmail').text(emailVal || '—');
         $('#contactPhone').text(phoneVal || '—');
       } catch(e) {
@@ -1402,10 +1403,10 @@
 
       // Populate shipping address inline next to the carrier link
       try {
-        var a = orderData.orders && orderData.orders.shipping_address;
+        var a = order.shipping_address;
         var lines = [];
         if (a && typeof a === 'object') {
-          var name = a.name || a.first_name && a.last_name ? (a.first_name + ' ' + a.last_name) : '';
+          var name = a.name || ((a.first_name && a.last_name) ? (a.first_name + ' ' + a.last_name) : '');
           if (name) lines.push(name);
           if (a.address1) lines.push(a.address1);
           if (a.address2) lines.push(a.address2);
@@ -1468,7 +1469,7 @@
       startIndeterminateProgress();
 
       $.ajax({
-        url: "https://analytics.triproriginals.com/tracking",
+        url: "https://ebrandzify.com/tracking",
         method: "GET",
         data: {
           order_id: orderNumber,
